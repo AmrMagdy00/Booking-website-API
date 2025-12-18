@@ -13,6 +13,7 @@ import { BookingsModule } from '@/features/bookings/bookings.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { CloudinaryModule } from './shared/modules/cloudinary.module';
 
 /**
  * AppModule - Root module of the application
@@ -21,6 +22,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 @Module({
   imports: [
     AppConfigModule,
+    CloudinaryModule,
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({

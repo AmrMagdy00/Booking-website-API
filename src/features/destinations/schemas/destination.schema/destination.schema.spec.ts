@@ -1,7 +1,7 @@
-import { DestinationSchema } from './destination.schema';
+import { Destination } from './destination.schema';
 
 describe('DestinationSchema', () => {
   it('should be defined', () => {
-    expect(new DestinationSchema()).toBeDefined();
+    expect(new Destination()).toBeDefined();
   });
 });
