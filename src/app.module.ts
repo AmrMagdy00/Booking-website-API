@@ -11,10 +11,11 @@ import { DestinationsModule } from '@/features/destinations/destinations.module'
 import { TripsModule } from '@/features/trips/trips.module';
 import { BookingsModule } from '@/features/bookings/bookings.module';
 import { MongooseModule } from '@nestjs/mongoose';
-
+import { CloudinaryModule } from './shared/modules/cloudinary.module';
 @Module({
   imports: [
     AppConfigModule,
+    CloudinaryModule,
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
