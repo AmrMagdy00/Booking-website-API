@@ -5,11 +5,12 @@ import { AppService } from '@/app.service';
 import { AppConfigModule } from '@/config/config.module';
 import { DatabaseModule } from '@/database/database.module';
 import { CommonModule } from '@/common/common.module';
-import { AuthModule } from '@/features/auth/auth.module';
-import { UsersModule } from '@/features/users/users.module';
-import { DestinationsModule } from '@/features/destinations/destinations.module';
-import { TripsModule } from '@/features/trips/trips.module';
-import { BookingsModule } from '@/features/bookings/bookings.module';
+import { AuthModule } from '@/modules/auth/auth.module';
+import { UsersModule } from '@/modules/users/users.module';
+import { DestinationsModule } from '@/modules/destinations/destinations.module';
+import { TripsModule } from '@/modules/trips/trips.module';
+import { BookingsModule } from '@/modules/bookings/bookings.module';
+import { PackagesModule } from '@/modules/packages/packages.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { APP_INTERCEPTOR } from '@nestjs/core';
@@ -36,6 +37,7 @@ import { CloudinaryModule } from './shared/modules/cloudinary.module';
     DestinationsModule,
     TripsModule,
     BookingsModule,
+    PackagesModule,
   ],
   controllers: [AppController],
   providers: [
