@@ -11,7 +11,13 @@ import { DestinationsModule } from '@/features/destinations/destinations.module'
 import { TripsModule } from '@/features/trips/trips.module';
 import { BookingsModule } from '@/features/bookings/bookings.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
+/**
+ * AppModule - Root module of the application
+ * Registers LoggingInterceptor globally to log all HTTP requests
+ */
 @Module({
   imports: [
     AppConfigModule,
@@ -30,6 +36,12 @@ import { MongooseModule } from '@nestjs/mongoose';
     BookingsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
+    },
+  ],
 })
 export class AppModule {}
