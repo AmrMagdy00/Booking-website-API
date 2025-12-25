@@ -1,26 +1,31 @@
-import { Module } from '@nestjs/common';
-import { DestinationsController } from './controllers/destinations/destinations.controller';
-import { DestinationsService } from './services/destinations/destinations.service';
-import { Destination,DestinationSchema } from './schemas/destination.schema/destination.schema';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { existsSync, mkdirSync } from 'fs';
-import { MulterModule } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-
-const uploadPath = '.uploads';
-if(!existsSync(uploadPath)) mkdirSync(uploadPath)
+import { DestinationsController } from './destinations.controller';
+import { DestinationsService } from './destinations.service';
+import { DestinationsRepository } from './destinations.repository';
+import { DestinationsMapper } from './mappers/destinations.mapper';
+import { Destination, DestinationSchema } from './schema/destination.schema';
+import { CommonModule } from '@/common/common.module';
+import { CloudinaryModule } from '@/shared/modules/cloudinary.module';
+import { AuthModule } from '@/modules/auth/auth.module';
+import { UsersModule } from '@/modules/users/users.module';
 
 @Module({
+  imports: [
+    MongooseModule.forFeature([
+      { name: Destination.name, schema: DestinationSchema },
+    ]),
+    CommonModule,
+    CloudinaryModule,
+    forwardRef(() => AuthModule),
+    forwardRef(() => UsersModule),
+  ],
   controllers: [DestinationsController],
-  providers: [DestinationsService],
-  imports:[MongooseModule.forFeature([{name:Destination.name,schema:DestinationSchema}]),
-  MulterModule.register({
-    storage:diskStorage({
-      destination:uploadPath,
-      filename:(req,file,cb)=> cb(null,Date.now()+'-'+file.originalname)
-    })
-  }),
-],
-  exports: [DestinationsService], // Export service to be used in other modules
+  providers: [
+    DestinationsService,
+    DestinationsRepository,
+    DestinationsMapper,
+  ],
+  exports: [DestinationsService],
 })
 export class DestinationsModule {}
