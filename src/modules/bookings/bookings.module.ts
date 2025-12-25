@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BookingsController } from './bookings.controller';
 import { BookingsService } from './bookings.service';
@@ -15,6 +15,8 @@ import {
 
 import { CommonModule } from '@/common/common.module';
 import { PackagesModule } from '@/modules/packages/packages.module';
+import { AuthModule } from '@/modules/auth/auth.module';
+import { UsersModule } from '@/modules/users/users.module';
 
 @Module({
   imports: [
@@ -23,7 +25,9 @@ import { PackagesModule } from '@/modules/packages/packages.module';
       { name: BookingContact.name, schema: BookingContactSchema },
     ]),
     CommonModule,
-    PackagesModule, // Import to use PackagesService
+    forwardRef(() => PackagesModule),
+    forwardRef(() => AuthModule),
+    forwardRef(() => UsersModule),
   ],
   controllers: [BookingsController],
   providers: [

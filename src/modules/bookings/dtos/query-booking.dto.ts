@@ -12,6 +12,11 @@ export class QueryBookingDto {
   @IsMongoId()
   contactId?: string;
 
+  // User ID - optional filter
+  @IsOptional()
+  @IsMongoId()
+  userId?: string;
+
   // Package ID - optional filter
   @IsOptional()
   @IsMongoId()

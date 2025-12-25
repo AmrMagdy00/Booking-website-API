@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   InternalServerErrorException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { BookingsRepository } from './bookings.repository';
 import { BookingsMapper } from './mappers/bookings.mapper';
@@ -19,6 +20,8 @@ import {
 import { ValidationUtil } from './utils/validation.util';
 import { FiltersUtil } from './utils/filters.util';
 import { PaginationUtil } from './utils/pagination.util';
+import { JWTPayloadType } from '@/common/auth/types/jwt-payload.type';
+import { UserRole } from '../users/enums/user-role.enum';
 
 /**
  * BookingsService - Business logic layer for bookings
@@ -35,11 +38,11 @@ export class BookingsService {
     private readonly packagesService: PackagesService,
   ) {}
 
-  async create(dto: CreateBookingDto): Promise<BookingDetailDto> {
+  async create(dto: CreateBookingDto, currentUser: JWTPayloadType): Promise<BookingDetailDto> {
     try {
       this.logger.info('Creating new booking', {
         packageId: dto.packageId,
-        userId: dto.userId,
+        actorId: currentUser.id,
       });
 
       // Validate package exists
@@ -50,13 +53,13 @@ export class BookingsService {
         name: dto.contact.name,
         email: dto.contact.email,
         phone: dto.contact.phone,
-        //[IMPORTANT] user Id will be get from the @current User later if authinticated
-        userId: dto.userId,
+        userId: currentUser.id, 
       });
 
       // Create booking with the contact ID
       const bookingData = this.bookingsMapper.toBookingData({
         ...dto,
+        userId: currentUser.id,
         contactId: contact._id.toString(),
       });
 
@@ -81,7 +84,7 @@ export class BookingsService {
     }
   }
 
-  async findAll(queryDto: QueryBookingDto): Promise<{
+  async findAll(queryDto: QueryBookingDto, currentUser: JWTPayloadType): Promise<{
     items: BookingListItemDto[];
     meta: { page: number; limit: number; total: number; totalPages: number };
   }> {
@@ -90,20 +93,24 @@ export class BookingsService {
       const limit = queryDto.limit || 10;
 
       this.logger.info('Fetching bookings', {
-        filters: {
-          contactId: queryDto.contactId,
-          packageId: queryDto.packageId,
-          status: queryDto.status,
-        },
+        actorId: currentUser.id,
         page,
         limit,
       });
 
-      const query = FiltersUtil.buildBookingQuery({
+      const queryBuilder: any = {
         contactId: queryDto.contactId,
         packageId: queryDto.packageId,
         status: queryDto.status,
-      });
+      };
+
+      if (currentUser.role !== UserRole.ADMIN) {
+        queryBuilder.userId = currentUser.id;
+      } else if (queryDto.userId) {
+        queryBuilder.userId = queryDto.userId;
+      }
+
+      const query = FiltersUtil.buildBookingQuery(queryBuilder);
 
       const { bookings, total } = await this.bookingsRepository.findAll(
         query,
@@ -121,9 +128,9 @@ export class BookingsService {
     }
   }
 
-  async findById(id: string): Promise<BookingDetailDto> {
+  async findById(id: string, currentUser: JWTPayloadType): Promise<BookingDetailDto> {
     try {
-      this.logger.info('Fetching booking by ID', { bookingId: id });
+      this.logger.info('Fetching booking by ID', { bookingId: id, actorId: currentUser.id });
 
       const booking = await this.bookingsRepository.findById(id);
 
@@ -132,9 +139,13 @@ export class BookingsService {
         throw new NotFoundException('Booking not found');
       }
 
+      if (currentUser.role !== UserRole.ADMIN && booking.userId.toString() !== currentUser.id) {
+        throw new ForbiddenException('You are not allowed to view this booking');
+      }
+
       return this.bookingsMapper.toDetailDto(booking);
     } catch (error) {
-      if (error instanceof NotFoundException) {
+      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
         throw error;
       }
 
@@ -143,9 +154,9 @@ export class BookingsService {
     }
   }
 
-  async update(id: string, dto: UpdateBookingDto): Promise<BookingDetailDto> {
+  async update(id: string, dto: UpdateBookingDto, currentUser: JWTPayloadType): Promise<BookingDetailDto> {
     try {
-      this.logger.info('Updating booking', { bookingId: id });
+      this.logger.info('Updating booking', { bookingId: id, actorId: currentUser.id });
 
       const existingBooking = await this.bookingsRepository.findById(id);
 
@@ -158,6 +169,10 @@ export class BookingsService {
       // Contact information is tied to the booking and should not be changed
       // If contact update is needed, it should be handled separately
 
+       if (currentUser.role !== UserRole.ADMIN && existingBooking.userId.toString() !== currentUser.id) {
+        throw new ForbiddenException('You are not allowed to update this booking');
+      }
+      
       // Validate package if being updated
       if (dto.packageId) {
         await ValidationUtil.validatePackage(
@@ -182,7 +197,7 @@ export class BookingsService {
 
       return this.bookingsMapper.toDetailDto(updatedBooking);
     } catch (error) {
-      if (error instanceof NotFoundException) {
+      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
         throw error;
       }
 

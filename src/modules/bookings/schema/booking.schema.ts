@@ -12,6 +12,14 @@ export type BookingDocument = HydratedDocument<Booking>;
 export class Booking {
   @Prop({
     type: Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true,
+  })
+  userId: Types.ObjectId;
+
+  @Prop({
+    type: Types.ObjectId,
     ref: 'BookingContact',
     required: true,
     index: true,

@@ -2,6 +2,7 @@ import { BookingStatus } from '../enums/booking-status.enum';
 
 export class BookingListItemDto {
   id: string;
+  userId: string; // Reference to authenticated user
   contactId: string; // Reference to booking contact
   packageId: string; // Reference to package
   numberOfPeople: number;
@@ -11,6 +12,7 @@ export class BookingListItemDto {
 
 export class BookingDetailDto {
   id: string;
+  userId: string; // Reference to authenticated user
   contactId: string; // Reference to booking contact
   packageId: string; // Reference to package
   numberOfPeople: number;

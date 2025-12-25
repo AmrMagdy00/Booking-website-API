@@ -19,6 +19,7 @@ export class BookingsMapper {
   toListItemDto(bookingDoc: BookingDocument): BookingListItemDto {
     return {
       id: bookingDoc._id.toString(),
+      userId: bookingDoc.userId.toString(),
       contactId: bookingDoc.contactId.toString(),
       packageId: bookingDoc.packageId.toString(),
       numberOfPeople: bookingDoc.numberOfPeople,
@@ -30,6 +31,7 @@ export class BookingsMapper {
   toDetailDto(bookingDoc: BookingDocument): BookingDetailDto {
     return {
       id: bookingDoc._id.toString(),
+      userId: bookingDoc.userId.toString(),
       contactId: bookingDoc.contactId.toString(),
       packageId: bookingDoc.packageId.toString(),
       numberOfPeople: bookingDoc.numberOfPeople,
@@ -44,8 +46,9 @@ export class BookingsMapper {
     return bookingDocs.map((doc) => this.toListItemDto(doc));
   }
 
-  toBookingData(dto: CreateBookingDto & { contactId: string }): Partial<Booking> {
+  toBookingData(dto: CreateBookingDto & { contactId: string; userId: string }): Partial<Booking> {
     return {
+      userId: new Types.ObjectId(dto.userId) as any,
       contactId: new Types.ObjectId(dto.contactId) as any,
       packageId: new Types.ObjectId(dto.packageId) as any,
       numberOfPeople: dto.numberOfPeople,

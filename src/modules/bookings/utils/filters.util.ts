@@ -9,6 +9,7 @@ export class FiltersUtil {
   static buildBookingQuery(filters: {
     contactId?: string;
     packageId?: string;
+    userId?: string;
     status?: BookingStatus;
   }): any {
     const query: any = {};
@@ -19,6 +20,10 @@ export class FiltersUtil {
 
     if (filters.packageId) {
       query.packageId = new Types.ObjectId(filters.packageId);
+    }
+
+    if (filters.userId) {
+      query.userId = new Types.ObjectId(filters.userId);
     }
 
     if (filters.status) {
