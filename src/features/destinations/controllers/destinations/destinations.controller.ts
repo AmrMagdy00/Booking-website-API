@@ -4,7 +4,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { CreateDestinationDto } from '../../dtos/create-destination.dto/create-destination.dto';
 import { UpdateDestinationDto } from '../../dtos/create-destination.dto/update-destination.dto';
 
-@Controller('destinations')
+@Controller('')
 export class DestinationsController {
 
     constructor(private readonly destinationsService:DestinationsService){}
