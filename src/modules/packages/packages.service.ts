@@ -8,12 +8,13 @@ import { PackagesRepository } from './packages.repository';
 import { PackagesMapper } from './mappers/packages.mapper';
 import { CloudinaryService } from '@/shared/services/cloudinary.service';
 import { AppLogger } from '@/common/logger/app-logger.service';
-import { DestinationsService } from '@/modules/destinations/services/destinations/destinations.service';
+import { DestinationsService } from '@/modules/destinations/destinations.service';
 import { CreatePackageDto } from './dtos/create-package.dto';
 import { UpdatePackageDto } from './dtos/update-package.dto';
 import { QueryPackageDto } from './dtos/query-package.dto';
 import { PackageListItemDto } from './dtos/package-response.dto';
 import { PackageDetailDto } from './dtos/package-response.dto';
+import { JWTPayloadType } from '@/common/auth/types/jwt-payload.type';
 
 /**
  * PackagesService - Business logic layer for packages
@@ -32,17 +33,19 @@ export class PackagesService {
 
   async create(
     dto: CreatePackageDto,
+    currentUser: JWTPayloadType,
     file?: Express.Multer.File,
   ): Promise<PackageDetailDto> {
     try {
-      this.logger.info('Creating new package', {
+      this.logger.info('Admin creating new package', {
         name: dto.name,
         destinationId: dto.destinationId,
+        actorId: currentUser.id,
       });
 
       // First check if the destination id is valid and exists
       try {
-        await this.destinationsService.getById(dto.destinationId);
+        await this.destinationsService.findById(dto.destinationId);
       } catch (error) {
         if (error instanceof NotFoundException) {
           this.logger.warn('Destination not found when creating package', {
@@ -117,7 +120,7 @@ export class PackagesService {
 
       // First check if the destination id is valid and exists
       try {
-        await this.destinationsService.getById(queryDto.destinationId);
+        await this.destinationsService.findById(queryDto.destinationId);
       } catch (error) {
         if (error instanceof NotFoundException) {
           this.logger.warn('Destination not found', {
@@ -189,10 +192,14 @@ export class PackagesService {
   async update(
     id: string,
     dto: UpdatePackageDto,
+    currentUser: JWTPayloadType,
     file?: Express.Multer.File,
   ): Promise<PackageDetailDto> {
     try {
-      this.logger.info('Updating package', { packageId: id });
+      this.logger.info('Admin updating package', { 
+        packageId: id, 
+        actorId: currentUser.id 
+      });
 
       const existingPackage = await this.packagesRepository.findById(id);
       if (!existingPackage) {
@@ -265,9 +272,12 @@ export class PackagesService {
     }
   }
 
-  async delete(id: string): Promise<{ message: string }> {
+  async delete(id: string, currentUser: JWTPayloadType): Promise<{ message: string }> {
     try {
-      this.logger.info('Deleting package', { packageId: id });
+      this.logger.info('Admin deleting package', { 
+        packageId: id, 
+        actorId: currentUser.id 
+      });
 
       // Find package to get image publicId
       const packageDoc = await this.packagesRepository.findById(id);
