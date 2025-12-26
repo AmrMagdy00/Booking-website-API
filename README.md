@@ -1,98 +1,191 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🏖️ Booking Website API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A comprehensive RESTful API for a travel booking platform built with NestJS. This API enables users to browse destinations, view travel packages, and manage bookings with a robust authentication and authorization system.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## ✨ Features
 
-## Description
+- **🔐 Authentication & Authorization**: JWT-based authentication with role-based access control (Admin/User)
+- **🌍 Destinations Management**: Browse and manage travel destinations with image uploads
+- **📦 Packages Management**: Create and manage travel packages linked to destinations
+- **📋 Bookings System**: Complete booking management with status tracking (Pending, Confirmed, Canceled)
+- **👥 User Management**: User registration, profile management, and admin controls
+- **📸 Image Upload**: Cloudinary integration for image storage and management
+- **📄 Pagination**: Efficient pagination for all list endpoints
+- **✅ Input Validation**: Comprehensive request validation using class-validator
+- **🧪 Unit Testing**: Full test coverage for all services
+- **📝 API Documentation**: Complete Postman collection with examples
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🛠️ Tech Stack
 
-## Project setup
+- **Framework**: NestJS (Node.js)
+- **Language**: TypeScript
+- **Database**: MongoDB with Mongoose
+- **Authentication**: JWT (JSON Web Tokens)
+- **File Upload**: Multer + Cloudinary
+- **Validation**: class-validator, class-transformer
+- **Testing**: Jest
+- **Architecture**: Clean Architecture (Repository Pattern, Service Layer, DTOs)
 
-```bash
-$ npm install
+## 📁 Project Structure
+
+```
+src/
+├── modules/          # Feature modules (Auth, Users, Destinations, Packages, Bookings)
+├── common/           # Shared utilities (Guards, Decorators, Pipes, Filters)
+├── config/          # Configuration files (Database, JWT, Cloudinary)
+├── shared/          # Shared services and utilities
+└── features/        # Additional feature modules
 ```
 
-## Compile and run the project
+## 🚀 Getting Started
 
+### Prerequisites
+
+- Node.js (v18 or higher)
+- MongoDB database
+- Cloudinary account (for image uploads)
+
+### Installation
+
+1. Clone the repository
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+git clone https://github.com/AmrMagdy00/Booking-website-API.git
+cd Booking-website-API
 ```
 
-## Run tests
-
+2. Install dependencies
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm install
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+3. Set up environment variables
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+cp .env.example .env
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+4. Configure your `.env` file:
+```env
+PORT=3000
+DATABASE_URI=mongodb://localhost:27017/booking-db
+JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=7d
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+```
 
-## Resources
+5. Run the application
+```bash
+# Development
+npm run start:dev
 
-Check out a few resources that may come in handy when working with NestJS:
+# Production
+npm run build
+npm run start
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## 📚 API Endpoints
 
-## Support
+### Authentication
+- `POST /auth/register` - Register new user
+- `POST /auth/login` - User login
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Users
+- `GET /users` - Get all users (Admin only)
+- `GET /users/:id` - Get user by ID
+- `POST /users` - Create user (Admin only)
+- `PATCH /users/:id` - Update user
+- `DELETE /users/:id` - Delete user
 
-## Stay in touch
+### Destinations
+- `GET /destinations` - Get all destinations (Public)
+- `GET /destinations/:id` - Get destination by ID (Public)
+- `POST /destinations` - Create destination (Admin only)
+- `PATCH /destinations/:id` - Update destination (Admin only)
+- `DELETE /destinations/:id` - Delete destination (Admin only)
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Packages
+- `GET /packages?destinationId=xxx` - Get packages by destination (Public)
+- `GET /packages/:id` - Get package by ID (Public)
+- `POST /packages` - Create package (Admin only)
+- `PATCH /packages/:id` - Update package (Admin only)
+- `DELETE /packages/:id` - Delete package (Admin only)
 
-## License
+### Bookings
+- `GET /bookings` - Get all bookings (Authenticated)
+- `GET /bookings/:id` - Get booking by ID (Authenticated)
+- `POST /bookings` - Create booking (Authenticated)
+- `PATCH /bookings/:id` - Update booking (Authenticated)
+- `DELETE /bookings/:id` - Delete booking (Admin only)
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## 🧪 Testing
+
+```bash
+# Run unit tests
+npm run test
+
+# Run tests with coverage
+npm run test:cov
+
+# Run e2e tests
+npm run test:e2e
+```
+
+## 📖 API Documentation
+
+A complete Postman collection is included in the repository (`Booking-wepsite-API.postman_collection.json`) with:
+- All endpoints documented
+- Request/response examples
+- Auto token handling
+- Test scripts
+
+## 🏗️ Architecture
+
+The project follows Clean Architecture principles:
+
+- **Controllers**: Handle HTTP requests and responses
+- **Services**: Business logic layer
+- **Repositories**: Data access layer
+- **DTOs**: Data Transfer Objects for validation
+- **Mappers**: Transform between entities and DTOs
+- **Guards**: Authentication and authorization
+- **Interceptors**: Cross-cutting concerns (logging)
+
+## 🔒 Security Features
+
+- Password hashing with bcrypt
+- JWT token-based authentication
+- Role-based access control (RBAC)
+- Input validation and sanitization
+- Environment variables for sensitive data
+- No hardcoded secrets
+
+## 📦 Key Dependencies
+
+- `@nestjs/core` - NestJS framework
+- `@nestjs/mongoose` - MongoDB integration
+- `@nestjs/jwt` - JWT authentication
+- `@nestjs/config` - Configuration management
+- `mongoose` - MongoDB ODM
+- `bcrypt` - Password hashing
+- `cloudinary` - Image storage
+- `class-validator` - Input validation
+
+## 🌐 Deployment
+
+The application is configured for deployment on platforms like Render, Heroku, or AWS. Make sure to set all required environment variables in your deployment platform.
+
+## 📝 License
+
+This project is private and proprietary.
+
+## 👤 Author
+
+**Amr Magdy**
+
+- GitHub: [@AmrMagdy00](https://github.com/AmrMagdy00)
+- Repository: [Booking-website-API](https://github.com/AmrMagdy00/Booking-website-API)
+
+---
+
+⭐ If you find this project interesting, feel free to explore the codebase!
