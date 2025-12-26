@@ -1,4 +1,4 @@
-import { BookingStatus } from '../enums/booking-status.enum';
+import { BookingStatus } from '@/modules/bookings/enums/booking-status.enum';
 
 export class BookingListItemDto {
   id: string;

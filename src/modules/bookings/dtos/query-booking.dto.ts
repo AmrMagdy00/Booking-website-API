@@ -1,6 +1,6 @@
 import { IsOptional, IsInt, IsEnum, IsMongoId, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { BookingStatus } from '../enums/booking-status.enum';
+import { BookingStatus } from '@/modules/bookings/enums/booking-status.enum';
 
 /**
  * QueryBookingDto - Data Transfer Object for querying bookings
@@ -41,4 +41,3 @@ export class QueryBookingDto {
   @Min(1)
   limit?: number = 10;
 }
-

@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { PackagesService } from '@/modules/packages/packages.service';
-import { BookingContactService } from '../booking-contact/booking-contact.service';
+import { BookingContactService } from '@/modules/bookings/booking-contact/booking-contact.service';
 
 /**
  * Validation utilities for booking operations

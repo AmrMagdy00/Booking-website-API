@@ -9,7 +9,7 @@ import {
   Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { BookingStatus } from '../enums/booking-status.enum';
+import { BookingStatus } from '@/modules/bookings/enums/booking-status.enum';
 
 /**
  * Contact information embedded in booking creation

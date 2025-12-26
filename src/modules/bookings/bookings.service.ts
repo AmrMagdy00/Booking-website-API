@@ -21,7 +21,7 @@ import { ValidationUtil } from './utils/validation.util';
 import { FiltersUtil } from './utils/filters.util';
 import { PaginationUtil } from './utils/pagination.util';
 import { JWTPayloadType } from '@/common/auth/types/jwt-payload.type';
-import { UserRole } from '../users/enums/user-role.enum';
+import { UserRole } from '@/modules/users/enums/user-role.enum';
 
 /**
  * BookingsService - Business logic layer for bookings
@@ -38,7 +38,10 @@ export class BookingsService {
     private readonly packagesService: PackagesService,
   ) {}
 
-  async create(dto: CreateBookingDto, currentUser: JWTPayloadType): Promise<BookingDetailDto> {
+  async create(
+    dto: CreateBookingDto,
+    currentUser: JWTPayloadType,
+  ): Promise<BookingDetailDto> {
     try {
       this.logger.info('Creating new booking', {
         packageId: dto.packageId,
@@ -53,7 +56,7 @@ export class BookingsService {
         name: dto.contact.name,
         email: dto.contact.email,
         phone: dto.contact.phone,
-        userId: currentUser.id, 
+        userId: currentUser.id,
       });
 
       // Create booking with the contact ID
@@ -84,7 +87,10 @@ export class BookingsService {
     }
   }
 
-  async findAll(queryDto: QueryBookingDto, currentUser: JWTPayloadType): Promise<{
+  async findAll(
+    queryDto: QueryBookingDto,
+    currentUser: JWTPayloadType,
+  ): Promise<{
     items: BookingListItemDto[];
     meta: { page: number; limit: number; total: number; totalPages: number };
   }> {
@@ -128,9 +134,15 @@ export class BookingsService {
     }
   }
 
-  async findById(id: string, currentUser: JWTPayloadType): Promise<BookingDetailDto> {
+  async findById(
+    id: string,
+    currentUser: JWTPayloadType,
+  ): Promise<BookingDetailDto> {
     try {
-      this.logger.info('Fetching booking by ID', { bookingId: id, actorId: currentUser.id });
+      this.logger.info('Fetching booking by ID', {
+        bookingId: id,
+        actorId: currentUser.id,
+      });
 
       const booking = await this.bookingsRepository.findById(id);
 
@@ -139,13 +151,21 @@ export class BookingsService {
         throw new NotFoundException('Booking not found');
       }
 
-      if (currentUser.role !== UserRole.ADMIN && booking.userId.toString() !== currentUser.id) {
-        throw new ForbiddenException('You are not allowed to view this booking');
+      if (
+        currentUser.role !== UserRole.ADMIN &&
+        booking.userId.toString() !== currentUser.id
+      ) {
+        throw new ForbiddenException(
+          'You are not allowed to view this booking',
+        );
       }
 
       return this.bookingsMapper.toDetailDto(booking);
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
         throw error;
       }
 
@@ -154,9 +174,16 @@ export class BookingsService {
     }
   }
 
-  async update(id: string, dto: UpdateBookingDto, currentUser: JWTPayloadType): Promise<BookingDetailDto> {
+  async update(
+    id: string,
+    dto: UpdateBookingDto,
+    currentUser: JWTPayloadType,
+  ): Promise<BookingDetailDto> {
     try {
-      this.logger.info('Updating booking', { bookingId: id, actorId: currentUser.id });
+      this.logger.info('Updating booking', {
+        bookingId: id,
+        actorId: currentUser.id,
+      });
 
       const existingBooking = await this.bookingsRepository.findById(id);
 
@@ -169,10 +196,15 @@ export class BookingsService {
       // Contact information is tied to the booking and should not be changed
       // If contact update is needed, it should be handled separately
 
-       if (currentUser.role !== UserRole.ADMIN && existingBooking.userId.toString() !== currentUser.id) {
-        throw new ForbiddenException('You are not allowed to update this booking');
+      if (
+        currentUser.role !== UserRole.ADMIN &&
+        existingBooking.userId.toString() !== currentUser.id
+      ) {
+        throw new ForbiddenException(
+          'You are not allowed to update this booking',
+        );
       }
-      
+
       // Validate package if being updated
       if (dto.packageId) {
         await ValidationUtil.validatePackage(
@@ -197,7 +229,10 @@ export class BookingsService {
 
       return this.bookingsMapper.toDetailDto(updatedBooking);
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
         throw error;
       }
 

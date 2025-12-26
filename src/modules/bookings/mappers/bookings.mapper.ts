@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
-import { Booking, BookingDocument } from '../schema/booking.schema';
+import {
+  Booking,
+  BookingDocument,
+} from '@/modules/bookings/schema/booking.schema';
 import {
   BookingListItemDto,
   BookingDetailDto,
-} from '../dtos/booking-response.dto';
-import { CreateBookingDto } from '../dtos/create-booking.dto';
-import { UpdateBookingDto } from '../dtos/update-booking.dto';
-import { BookingStatus } from '../enums/booking-status.enum';
+} from '@/modules/bookings/dtos/booking-response.dto';
+import { CreateBookingDto } from '@/modules/bookings/dtos/create-booking.dto';
+import { UpdateBookingDto } from '@/modules/bookings/dtos/update-booking.dto';
+import { BookingStatus } from '@/modules/bookings/enums/booking-status.enum';
 
 /**
  * BookingsMapper - Mapper layer for transforming between schemas and DTOs
@@ -46,7 +49,9 @@ export class BookingsMapper {
     return bookingDocs.map((doc) => this.toListItemDto(doc));
   }
 
-  toBookingData(dto: CreateBookingDto & { contactId: string; userId: string }): Partial<Booking> {
+  toBookingData(
+    dto: CreateBookingDto & { contactId: string; userId: string },
+  ): Partial<Booking> {
     return {
       userId: new Types.ObjectId(dto.userId) as any,
       contactId: new Types.ObjectId(dto.contactId) as any,
@@ -72,4 +77,3 @@ export class BookingsMapper {
     return updateData;
   }
 }
-

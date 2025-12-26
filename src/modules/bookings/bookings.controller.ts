@@ -17,7 +17,7 @@ import { ResponseService } from '@/shared/services/response/response.service';
 import { UpdateBookingDto } from './dtos/update-booking.dto';
 import { AuthRolesGuard } from '@/common/guards/auth/auth.guard';
 import { Roles } from '@/common/auth/decorators/roles.decorator';
-import { UserRole } from '../users/enums/user-role.enum';
+import { UserRole } from '@/modules/users/enums/user-role.enum';
 import { CurrentUser } from '@/common/decorators/current-user/current-user.decorator';
 import { JWTPayloadType } from '@/common/auth/types/jwt-payload.type';
 
@@ -35,7 +35,7 @@ export class BookingsController {
     const result = await this.bookingsService.findAll(queryDto, user);
     return ResponseService.paginatedResponse(result.items, result.meta);
   }
-  
+
   // Admins || Auth User get only related bookings
   @Get(':id')
   async getBookingById(

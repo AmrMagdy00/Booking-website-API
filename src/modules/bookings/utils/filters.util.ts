@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { BookingStatus } from '../enums/booking-status.enum';
+import { BookingStatus } from '@/modules/bookings/enums/booking-status.enum';
 
 /**
  * Filter utilities for building database queries

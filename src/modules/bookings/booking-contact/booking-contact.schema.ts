@@ -34,4 +34,3 @@ export class BookingContact {
 
 export const BookingContactSchema =
   SchemaFactory.createForClass(BookingContact);
-

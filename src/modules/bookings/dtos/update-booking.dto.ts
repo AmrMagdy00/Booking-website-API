@@ -7,4 +7,3 @@ import { CreateBookingDto } from './create-booking.dto';
  * Allows partial updates to booking properties
  */
 export class UpdateBookingDto extends PartialType(CreateBookingDto) {}
-
