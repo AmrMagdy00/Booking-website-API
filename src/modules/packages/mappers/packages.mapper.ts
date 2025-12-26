@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
-import { Package, PackageDocument } from '../schema/package.schema';
+import {
+  Package,
+  PackageDocument,
+} from '@/modules/packages/schema/package.schema';
 import {
   PackageListItemDto,
   PackageDetailDto,
-} from '../dtos/package-response.dto';
-import { CreatePackageDto } from '../dtos/create-package.dto';
-import { UpdatePackageDto } from '../dtos/update-package.dto';
+} from '@/modules/packages/dtos/package-response.dto';
+import { CreatePackageDto } from '@/modules/packages/dtos/create-package.dto';
+import { UpdatePackageDto } from '@/modules/packages/dtos/update-package.dto';
 
 /**
  * PackagesMapper - Mapper layer for transforming between schemas and DTOs

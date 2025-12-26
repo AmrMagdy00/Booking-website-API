@@ -22,7 +22,7 @@ import {
 import { UpdatePackageDto } from './dtos/update-package.dto';
 import { AuthRolesGuard } from '@/common/guards/auth/auth.guard';
 import { Roles } from '@/common/auth/decorators/roles.decorator';
-import { UserRole } from '../users/enums/user-role.enum';
+import { UserRole } from '@/modules/users/enums/user-role.enum';
 import { CurrentUser } from '@/common/decorators/current-user/current-user.decorator';
 import { JWTPayloadType } from '@/common/auth/types/jwt-payload.type';
 
@@ -71,7 +71,12 @@ export class PackagesController {
     @CurrentUser() user: JWTPayloadType,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    const packageDetail = await this.packagesService.update(id, dto, user, file);
+    const packageDetail = await this.packagesService.update(
+      id,
+      dto,
+      user,
+      file,
+    );
     return ResponseService.successResponse(
       packageDetail,
       'Package updated successfully',

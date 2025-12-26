@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PackagesService } from '../packages.service';
-import { PackagesMapper } from '../mappers/packages.mapper';
+import { PackagesService } from '@/modules/packages/packages.service';
+import { PackagesMapper } from '@/modules/packages/mappers/packages.mapper';
 import { CloudinaryService } from '@/shared/services/cloudinary.service';
 import { AppLogger } from '@/common/logger/app-logger.service';
 import { DestinationsService } from '@/modules/destinations/destinations.service';
@@ -10,9 +10,9 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { Types } from 'mongoose';
-import { PackagesRepository } from '../packages.repository';
-import { Package } from '../schema/package.schema';
-import { PackageListItemDto } from '../dtos/package-response.dto';
+import { PackagesRepository } from '@/modules/packages/packages.repository';
+import { Package } from '@/modules/packages/schema/package.schema';
+import { PackageListItemDto } from '@/modules/packages/dtos/package-response.dto';
 import { UserRole } from '@/modules/users/enums/user-role.enum';
 
 /**
@@ -132,11 +132,11 @@ describe('PackagesService', () => {
     }).compile();
 
     service = module.get<PackagesService>(PackagesService);
-    repository = module.get(PackagesRepository) as any;
-    mapper = module.get(PackagesMapper) as any;
-    cloudinaryService = module.get(CloudinaryService) as any;
-    logger = module.get(AppLogger) as any;
-    destinationsService = module.get(DestinationsService) as any;
+    repository = module.get(PackagesRepository);
+    mapper = module.get(PackagesMapper);
+    cloudinaryService = module.get(CloudinaryService);
+    logger = module.get(AppLogger);
+    destinationsService = module.get(DestinationsService);
   });
 
   afterEach(() => {
@@ -171,7 +171,9 @@ describe('PackagesService', () => {
       const result = await service.create(mockCreateDto, mockUser, mockFile);
 
       // Assert
-      expect(destinationsService.findById).toHaveBeenCalledWith(mockCreateDto.destinationId);
+      expect(destinationsService.findById).toHaveBeenCalledWith(
+        mockCreateDto.destinationId,
+      );
       expect(cloudinaryService.uploadImageFromBuffer).toHaveBeenCalledWith(
         mockFile.buffer,
         'packages',
@@ -190,11 +192,13 @@ describe('PackagesService', () => {
     });
 
     it('should throw NotFoundException if destination does not exist', async () => {
-      destinationsService.findById.mockRejectedValue(new NotFoundException('Destination not found'));
-      
-      await expect(service.create(mockCreateDto, mockUser, mockFile)).rejects.toThrow(
-        NotFoundException,
+      destinationsService.findById.mockRejectedValue(
+        new NotFoundException('Destination not found'),
       );
+
+      await expect(
+        service.create(mockCreateDto, mockUser, mockFile),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -230,7 +234,9 @@ describe('PackagesService', () => {
       const result = await service.findByDestinationId(queryDto);
 
       // Assert
-      expect(destinationsService.findById).toHaveBeenCalledWith(mockDestinationId);
+      expect(destinationsService.findById).toHaveBeenCalledWith(
+        mockDestinationId,
+      );
       expect(repository.findByDestinationId).toHaveBeenCalledWith(
         mockDestinationId,
         1,
@@ -302,7 +308,12 @@ describe('PackagesService', () => {
       mapper.toDetailDto.mockReturnValue(expectedDetailDto);
 
       // Act
-      const result = await service.update(mockPackageId, updateDto, mockUser, mockFile);
+      const result = await service.update(
+        mockPackageId,
+        updateDto,
+        mockUser,
+        mockFile,
+      );
 
       // Assert
       expect(cloudinaryService.deleteImage).toHaveBeenCalledWith(
