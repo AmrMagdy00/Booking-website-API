@@ -5,5 +5,5 @@ import { registerAs } from '@nestjs/config';
  * Registers app settings like port from environment variables
  */
 export default registerAs('app', () => ({
-  port: Number(process.env.PORT),
+  port: Number(process.env.PORT) || 3000,
 }));
