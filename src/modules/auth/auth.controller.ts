@@ -1,8 +1,8 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDto as RegisterDto } from '../users/dtos/create-user.dto';
 import { LoginDto } from './dtos/login.dto';
 import { ResponseService } from '@/shared/services/response/response.service';
+import { RegisterDto } from './dtos/register.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -11,7 +11,10 @@ export class AuthController {
   @Post('register')
   async register(@Body() dto: RegisterDto) {
     const result = await this.authService.register(dto);
-    return ResponseService.successResponse(result, 'User registered successfully');
+    return ResponseService.successResponse(
+      result,
+      'User registered successfully',
+    );
   }
 
   @Post('login')

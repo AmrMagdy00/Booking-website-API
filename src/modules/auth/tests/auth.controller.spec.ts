@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthController } from '../auth.controller';
-import { AuthService } from '../auth.service';
+import { AuthController } from '@/modules/auth/auth.controller';
+import { AuthService } from '@/modules/auth/auth.service';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -21,7 +21,7 @@ describe('AuthController', () => {
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
-    service = module.get(AuthService) as any;
+    service = module.get(AuthService);
   });
 
   describe('register', () => {
@@ -41,7 +41,10 @@ describe('AuthController', () => {
       const mockResult = { user: { email: 't@t.com' }, token: 'tk' };
       service.login.mockResolvedValue(mockResult as any);
 
-      const result = await controller.login({ email: 't@t.com', password: '123' });
+      const result = await controller.login({
+        email: 't@t.com',
+        password: '123',
+      });
 
       expect(result.data).toEqual(mockResult);
       expect(result.message).toContain('successful');

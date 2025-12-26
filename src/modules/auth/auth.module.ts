@@ -3,7 +3,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { UsersModule } from '../users/users.module';
+import { AuthMapper } from './mappers/auth.mapper';
+import { UsersModule } from '@/modules/users/users.module';
 import { CommonModule } from '@/common/common.module';
 
 @Module({
@@ -13,15 +14,17 @@ import { CommonModule } from '@/common/common.module';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        global: true,
-        secret: config.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '12h' },
-      }),
+      useFactory: (config: ConfigService) => {
+        const jwtConfig = config.get('jwt');
+        return {
+          secret: jwtConfig?.secret,
+          signOptions: { expiresIn: jwtConfig?.expiresIn },
+        };
+      },
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, AuthMapper],
   exports: [AuthService, JwtModule],
 })
 export class AuthModule {}
