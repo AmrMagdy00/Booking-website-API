@@ -1,21 +1,101 @@
 {
 	"info": {
 		"_postman_id": "e92ab62e-d548-498f-9ea0-c4d5a2632717",
-		"name": "Booking Website API - Complete",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"name": "Booking Website API - Complete Documentation",
+		"description": "Complete API documentation for Booking Website. This collection includes all endpoints with detailed descriptions, examples, and automated token handling.\n\n## Authentication\nAll protected endpoints require a Bearer token in the Authorization header. Use the Login endpoint to get your token, then it will be automatically saved and used for subsequent requests.\n\n## Base URL\nDefault: `http://localhost:3000`\n\n## Response Format\nAll responses follow this structure:\n- Success: `{ success: true, message: string, data: any }`\n- Paginated: `{ success: true, data: array, meta: { page, limit, total, totalPages } }`\n- Error: `{ success: false, message: string, statusCode: number }`",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "booking-api"
 	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-set token if available",
+					"if (pm.collectionVariables.get('token') && pm.collectionVariables.get('token') !== 'YOUR_JWT_TOKEN_HERE') {",
+					"    pm.request.headers.add({",
+					"        key: 'Authorization',",
+					"        value: 'Bearer ' + pm.collectionVariables.get('token')",
+					"    });",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test: Check response time",
+					"pm.test('Response time is less than 5000ms', function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+					"});",
+					"",
+					"// Global test: Check response format",
+					"if (pm.response.code >= 200 && pm.response.code < 300) {",
+					"    const jsonData = pm.response.json();",
+					"    pm.test('Response has success field', function () {",
+					"        pm.expect(jsonData).to.have.property('success');",
+					"    });",
+					"}"
+				]
+			}
+		}
+	],
 	"item": [
 		{
 			"name": "0. Authentication",
+			"description": "Authentication endpoints for user registration and login. No authentication required.",
 			"item": [
 				{
 					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Response has success field', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});",
+									"",
+									"pm.test('Response contains user data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('data');",
+									"    pm.expect(jsonData.data).to.have.property('user');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"user@example.com\",\n    \"userName\": \"scorpionscorpion\",\n    \"password\": \"S12345678\",\n    \"confirmPassword\": \"S12345678\"\n}",
+							"raw": "{\n    \"email\": \"user@example.com\",\n    \"userName\": \"testuser\",\n    \"password\": \"Password123\",\n    \"confirmPassword\": \"Password123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -31,17 +111,56 @@
 								"auth",
 								"register"
 							]
-						}
-					}
+						},
+						"description": "Register a new user account.\n\n**Request Body:**\n- `email` (string, required): Valid email address\n- `userName` (string, required): Username (min 2 characters)\n- `password` (string, required): Password (min 8 characters)\n- `confirmPassword` (string, required): Must match password\n\n**Response:**\n- Status: 201 Created\n- Body: `{ success: true, message: string, data: { user: UserResponseDto, token: string } }`"
+					},
+					"response": []
 				},
 				{
 					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has success field', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});",
+									"",
+									"pm.test('Response contains token', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('data');",
+									"    pm.expect(jsonData.data).to.have.property('token');",
+									"    ",
+									"    // Auto-save token",
+									"    if (jsonData.data.token) {",
+									"        pm.collectionVariables.set('token', jsonData.data.token);",
+									"        pm.collectionVariables.set('userId', jsonData.data.user.id);",
+									"        pm.collectionVariables.set('userRole', jsonData.data.user.role);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"S12345678\"\n}",
+							"raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"Password123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -57,16 +176,19 @@
 								"auth",
 								"login"
 							]
-						}
-					}
+						},
+						"description": "Login with email and password to get JWT token.\n\n**Request Body:**\n- `email` (string, required): Registered email address\n- `password` (string, required): User password\n\n**Response:**\n- Status: 200 OK\n- Body: `{ success: true, message: string, data: { user: UserResponseDto, token: string } }`\n\n**Note:** Token is automatically saved to collection variables for use in other requests."
+					},
+					"response": []
 				}
 			]
 		},
 		{
 			"name": "1. Users",
+			"description": "User management endpoints. Most endpoints require authentication. Admin-only endpoints are marked.",
 			"item": [
 				{
-					"name": "Get All Users (Admin)",
+					"name": "Get All Users (Admin Only)",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -89,11 +211,21 @@
 								"users"
 							],
 							"query": [
-								{ "key": "page", "value": "1" },
-								{ "key": "limit", "value": "10" }
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Items per page (default: 10)"
+								}
 							]
-						}
-					}
+						},
+						"description": "Get paginated list of all users. **Admin only.**\n\n**Query Parameters:**\n- `page` (number, optional): Page number (default: 1)\n- `limit` (number, optional): Items per page (default: 10)\n\n**Response:**\n- Status: 200 OK\n- Body: `{ success: true, data: UserResponseDto[], meta: { page, limit, total, totalPages } }`"
+					},
+					"response": []
 				},
 				{
 					"name": "Get User by ID",
@@ -120,13 +252,19 @@
 								":id"
 							],
 							"variable": [
-								{ "key": "id", "value": "ID_HERE" }
+								{
+									"key": "id",
+									"value": "{{userId}}",
+									"description": "User ID (MongoDB ObjectId)"
+								}
 							]
-						}
-					}
+						},
+						"description": "Get user details by ID. Users can only view their own profile unless they are admin.\n\n**Path Parameters:**\n- `id` (string, required): User ID (MongoDB ObjectId)\n\n**Response:**\n- Status: 200 OK\n- Body: `{ success: true, message: string, data: UserResponseDto }`"
+					},
+					"response": []
 				},
 				{
-					"name": "Create User (Admin)",
+					"name": "Create User (Admin Only)",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -139,10 +277,15 @@
 							]
 						},
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"newadmin@example.com\",\n    \"userName\": \"adminadmin\",\n    \"password\": \"A12345678\",\n    \"role\": \"ADMIN\"\n}",
+							"raw": "{\n    \"email\": \"newuser@example.com\",\n    \"userName\": \"newuser\",\n    \"password\": \"Password123\",\n    \"role\": \"normal_user\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -157,8 +300,10 @@
 							"path": [
 								"users"
 							]
-						}
-					}
+						},
+						"description": "Create a new user. **Admin only.**\n\n**Request Body:**\n- `email` (string, required): Valid email address\n- `userName` (string, required): Username\n- `password` (string, required): Password (min 8 characters)\n- `role` (enum, optional): User role - `admin` or `normal_user` (default: `normal_user`)\n\n**Response:**\n- Status: 201 Created\n- Body: `{ success: true, message: string, data: UserResponseDto }`"
+					},
+					"response": []
 				},
 				{
 					"name": "Update User",
@@ -174,7 +319,12 @@
 							]
 						},
 						"method": "PATCH",
-						"header": [],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"userName\": \"updatedname\"\n}",
@@ -194,10 +344,16 @@
 								":id"
 							],
 							"variable": [
-								{ "key": "id", "value": "ID_HERE" }
+								{
+									"key": "id",
+									"value": "{{userId}}",
+									"description": "User ID (MongoDB ObjectId)"
+								}
 							]
-						}
-					}
+						},
+						"description": "Update user information. Users can only update their own profile unless they are admin.\n\n**Path Parameters:**\n- `id` (string, required): User ID\n\n**Request Body:**\n- `userName` (string, optional): New username\n- `email` (string, optional): New email\n- `password` (string, optional): New password (min 8 characters)\n\n**Response:**\n- Status: 200 OK\n- Body: `{ success: true, message: string, data: UserResponseDto }`"
+					},
+					"response": []
 				},
 				{
 					"name": "Delete User",
@@ -224,15 +380,22 @@
 								":id"
 							],
 							"variable": [
-								{ "key": "id", "value": "ID_HERE" }
+								{
+									"key": "id",
+									"value": "{{userId}}",
+									"description": "User ID (MongoDB ObjectId)"
+								}
 							]
-						}
-					}
+						},
+						"description": "Delete a user. Users can only delete their own account unless they are admin.\n\n**Path Parameters:**\n- `id` (string, required): User ID\n\n**Response:**\n- Status: 200 OK\n- Body: `{ success: true, message: string, data: { message: string } }`"
+					},
+					"response": []
 				}
 			]
 		},
 		{
 			"name": "2. Destinations",
+			"description": "Destination management endpoints. Public read access, admin-only write access.",
 			"item": [
 				{
 					"name": "Get All Destinations",
@@ -248,12 +411,27 @@
 								"destinations"
 							],
 							"query": [
-								{ "key": "page", "value": "1" },
-								{ "key": "limit", "value": "10" },
-								{ "key": "name", "value": "", "disabled": true }
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Items per page (default: 10)"
+								},
+								{
+									"key": "name",
+									"value": "",
+									"description": "Filter by destination name (optional)",
+									"disabled": true
+								}
 							]
-						}
-					}
+						},
+						"description": "Get paginated list of all destinations. **Public endpoint - no authentication required.**\n\n**Query Parameters:**\n- `page` (number, optional): Page number (default: 1)\n- `limit` (number, optional): Items per page (default: 10)\n- `name` (string, optional): Filter by destination name\n\n**Response:**\n- Status: 200 OK\n- Body: `{ success: true, data: DestinationResponseDto[], meta: { page, limit, total, totalPages } }`\n\n**Note:** Response includes `packagesCount` and `minPrice` for each destination."
+					},
+					"response": []
 				},
 				{
 					"name": "Get Destination by ID",
@@ -270,13 +448,19 @@
 								":id"
 							],
 							"variable": [
-								{ "key": "id", "value": "ID_HERE" }
+								{
+									"key": "id",
+									"value": "{{destinationId}}",
+									"description": "Destination ID (MongoDB ObjectId)"
+								}
 							]
-						}
-					}
+						},
+						"description": "Get destination details by ID. **Public endpoint - no authentication required.**\n\n**Path Parameters:**\n- `id` (string, required): Destination ID (MongoDB ObjectId)\n\n**Response:**\n- Status: 200 OK\n- Body: `{ success: true, message: string, data: DestinationResponseDto }`\n\n**Note:** Response includes `packagesCount` and `minPrice`."
+					},
+					"response": []
 				},
 				{
-					"name": "Create Destination (Admin)",
+					"name": "Create Destination (Admin Only)",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -293,10 +477,24 @@
 						"body": {
 							"mode": "formdata",
 							"formdata": [
-								{ "key": "name", "value": "Sharm El-Sheikh", "type": "text" },
-								{ "key": "governoratName", "value": "South Sinai", "type": "text" },
-								{ "key": "description", "value": "Beautiful beach city", "type": "text" },
-								{ "key": "image", "type": "file", "src": [] }
+								{
+									"key": "name",
+									"value": "Sharm El-Sheikh",
+									"type": "text",
+									"description": "Destination name (2-100 characters)"
+								},
+								{
+									"key": "description",
+									"value": "Beautiful beach city with crystal clear waters and amazing coral reefs",
+									"type": "text",
+									"description": "Destination description (min 3 characters)"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": [],
+									"description": "Destination image (required, JPG/PNG)"
+								}
 							]
 						},
 						"url": {
@@ -307,11 +505,13 @@
 							"path": [
 								"destinations"
 							]
-						}
-					}
+						},
+						"description": "Create a new destination. **Admin only.**\n\n**Request Body (multipart/form-data):**\n- `name` (string, required): Destination name (2-100 characters)\n- `description` (string, required): Destination description (min 3 characters)\n- `image` (file, required): Destination image file (JPG/PNG)\n\n**Response:**\n- Status: 201 Created\n- Body: `{ success: true, message: string, data: DestinationResponseDto }`"
+					},
+					"response": []
 				},
 				{
-					"name": "Update Destination (Admin)",
+					"name": "Update Destination (Admin Only)",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -328,8 +528,26 @@
 						"body": {
 							"mode": "formdata",
 							"formdata": [
-								{ "key": "name", "value": "Updated Name", "type": "text" },
-								{ "key": "image", "type": "file", "src": [], "disabled": true }
+								{
+									"key": "name",
+									"value": "Updated Name",
+									"type": "text",
+									"description": "Destination name (optional)"
+								},
+								{
+									"key": "description",
+									"value": "Updated description",
+									"type": "text",
+									"description": "Destination description (optional)",
+									"disabled": true
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": [],
+									"description": "New destination image (optional)",
+									"disabled": true
+								}
 							]
 						},
 						"url": {
@@ -342,13 +560,19 @@
 								":id"
 							],
 							"variable": [
-								{ "key": "id", "value": "ID_HERE" }
+								{
+									"key": "id",
+									"value": "{{destinationId}}",
+									"description": "Destination ID (MongoDB ObjectId)"
+								}
 							]
-						}
-					}
+						},
+						"description": "Update destination information. **Admin only.**\n\n**Path Parameters:**\n- `id` (string, required): Destination ID\n\n**Request Body (multipart/form-data):**\n- `name` (string, optional): New destination name\n- `description` (string, optional): New description\n- `image` (file, optional): New destination image (replaces existing)\n\n**Response:**\n- Status: 200 OK\n- Body: `{ success: true, message: string, data: DestinationResponseDto }`"
+					},
+					"response": []
 				},
 				{
-					"name": "Delete Destination (Admin)",
+					"name": "Delete Destination (Admin Only)",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -372,15 +596,22 @@
 								":id"
 							],
 							"variable": [
-								{ "key": "id", "value": "ID_HERE" }
+								{
+									"key": "id",
+									"value": "{{destinationId}}",
+									"description": "Destination ID (MongoDB ObjectId)"
+								}
 							]
-						}
-					}
+						},
+						"description": "Delete a destination. **Admin only.**\n\n**Path Parameters:**\n- `id` (string, required): Destination ID\n\n**Response:**\n- Status: 200 OK\n- Body: `{ success: true, message: string, data: { message: string } }`"
+					},
+					"response": []
 				}
 			]
 		},
 		{
 			"name": "3. Packages",
+			"description": "Package management endpoints. Public read access, admin-only write access.",
 			"item": [
 				{
 					"name": "Get Packages by Destination",
@@ -388,7 +619,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/packages?destinationId=ID_HERE&page=1&limit=10",
+							"raw": "{{baseUrl}}/packages?destinationId={{destinationId}}&page=1&limit=10",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -396,12 +627,26 @@
 								"packages"
 							],
 							"query": [
-								{ "key": "destinationId", "value": "DEST_ID_HERE" },
-								{ "key": "page", "value": "1" },
-								{ "key": "limit", "value": "10" }
+								{
+									"key": "destinationId",
+									"value": "{{destinationId}}",
+									"description": "Destination ID (MongoDB ObjectId, required)"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Items per page (default: 10)"
+								}
 							]
-						}
-					}
+						},
+						"description": "Get paginated list of packages for a specific destination. **Public endpoint - no authentication required.**\n\n**Query Parameters:**\n- `destinationId` (string, required): Destination ID (MongoDB ObjectId)\n- `page` (number, optional): Page number (default: 1)\n- `limit` (number, optional): Items per page (default: 10)\n\n**Response:**\n- Status: 200 OK\n- Body: `{ success: true, data: PackageListItemDto[], meta: { page, limit, total, totalPages } }`"
+					},
+					"response": []
 				},
 				{
 					"name": "Get Package by ID",
@@ -418,13 +663,19 @@
 								":id"
 							],
 							"variable": [
-								{ "key": "id", "value": "ID_HERE" }
+								{
+									"key": "id",
+									"value": "{{packageId}}",
+									"description": "Package ID (MongoDB ObjectId)"
+								}
 							]
-						}
-					}
+						},
+						"description": "Get package details by ID. **Public endpoint - no authentication required.**\n\n**Path Parameters:**\n- `id` (string, required): Package ID (MongoDB ObjectId)\n\n**Response:**\n- Status: 200 OK\n- Body: `{ success: true, message: string, data: PackageDetailDto }`"
+					},
+					"response": []
 				},
 				{
-					"name": "Create Package (Admin)",
+					"name": "Create Package (Admin Only)",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -441,12 +692,55 @@
 						"body": {
 							"mode": "formdata",
 							"formdata": [
-								{ "key": "name", "value": "Standard Fun", "type": "text" },
-								{ "key": "description", "value": "Adventure awaits", "type": "text" },
-								{ "key": "price", "value": "299.99", "type": "text" },
-								{ "key": "duration", "value": "3 days", "type": "text" },
-								{ "key": "destinationId", "value": "DEST_ID_HERE", "type": "text" },
-								{ "key": "image", "type": "file", "src": [] }
+								{
+									"key": "destinationId",
+									"value": "{{destinationId}}",
+									"type": "text",
+									"description": "Destination ID (MongoDB ObjectId, required)"
+								},
+								{
+									"key": "name",
+									"value": "Standard Fun Package",
+									"type": "text",
+									"description": "Package name (2-100 characters, required)"
+								},
+								{
+									"key": "description",
+									"value": "Adventure awaits with this amazing package",
+									"type": "text",
+									"description": "Package description (required)"
+								},
+								{
+									"key": "duration",
+									"value": "3",
+									"type": "text",
+									"description": "Duration in days (min 1, required)"
+								},
+								{
+									"key": "groupSize",
+									"value": "10",
+									"type": "text",
+									"description": "Maximum group size (min 1, required)"
+								},
+								{
+									"key": "price",
+									"value": "299.99",
+									"type": "text",
+									"description": "Package price (min 0, required)"
+								},
+								{
+									"key": "included",
+									"value": "[\"Breakfast\", \"Lunch\", \"Transportation\"]",
+									"type": "text",
+									"description": "Included services (JSON array or comma-separated, optional)",
+									"disabled": true
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": [],
+									"description": "Package image (required, JPG/PNG)"
+								}
 							]
 						},
 						"url": {
@@ -457,11 +751,13 @@
 							"path": [
 								"packages"
 							]
-						}
-					}
+						},
+						"description": "Create a new package. **Admin only.**\n\n**Request Body (multipart/form-data):**\n- `destinationId` (string, required): Destination ID (MongoDB ObjectId)\n- `name` (string, required): Package name (2-100 characters)\n- `description` (string, required): Package description\n- `duration` (number, required): Duration in days (min 1)\n- `groupSize` (number, required): Maximum group size (min 1)\n- `price` (number, required): Package price (min 0)\n- `included` (array, optional): Included services (can be JSON array or comma-separated string)\n- `image` (file, required): Package image file (JPG/PNG)\n\n**Response:**\n- Status: 201 Created\n- Body: `{ success: true, message: string, data: PackageDetailDto }`"
+					},
+					"response": []
 				},
 				{
-					"name": "Update Package (Admin)",
+					"name": "Update Package (Admin Only)",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -478,8 +774,47 @@
 						"body": {
 							"mode": "formdata",
 							"formdata": [
-								{ "key": "price", "value": "349.99", "type": "text" },
-								{ "key": "image", "type": "file", "src": [], "disabled": true }
+								{
+									"key": "name",
+									"value": "Updated Package Name",
+									"type": "text",
+									"description": "Package name (optional)",
+									"disabled": true
+								},
+								{
+									"key": "description",
+									"value": "Updated description",
+									"type": "text",
+									"description": "Package description (optional)",
+									"disabled": true
+								},
+								{
+									"key": "price",
+									"value": "349.99",
+									"type": "text",
+									"description": "Package price (optional)"
+								},
+								{
+									"key": "duration",
+									"value": "5",
+									"type": "text",
+									"description": "Duration in days (optional)",
+									"disabled": true
+								},
+								{
+									"key": "groupSize",
+									"value": "15",
+									"type": "text",
+									"description": "Maximum group size (optional)",
+									"disabled": true
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": [],
+									"description": "New package image (optional, replaces existing)",
+									"disabled": true
+								}
 							]
 						},
 						"url": {
@@ -492,13 +827,19 @@
 								":id"
 							],
 							"variable": [
-								{ "key": "id", "value": "ID_HERE" }
+								{
+									"key": "id",
+									"value": "{{packageId}}",
+									"description": "Package ID (MongoDB ObjectId)"
+								}
 							]
-						}
-					}
+						},
+						"description": "Update package information. **Admin only.**\n\n**Path Parameters:**\n- `id` (string, required): Package ID\n\n**Request Body (multipart/form-data):**\n- `name` (string, optional): New package name\n- `description` (string, optional): New description\n- `duration` (number, optional): New duration in days\n- `groupSize` (number, optional): New maximum group size\n- `price` (number, optional): New price\n- `included` (array, optional): New included services\n- `image` (file, optional): New package image (replaces existing)\n\n**Response:**\n- Status: 200 OK\n- Body: `{ success: true, message: string, data: PackageDetailDto }`"
+					},
+					"response": []
 				},
 				{
-					"name": "Delete Package (Admin)",
+					"name": "Delete Package (Admin Only)",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -522,18 +863,25 @@
 								":id"
 							],
 							"variable": [
-								{ "key": "id", "value": "ID_HERE" }
+								{
+									"key": "id",
+									"value": "{{packageId}}",
+									"description": "Package ID (MongoDB ObjectId)"
+								}
 							]
-						}
-					}
+						},
+						"description": "Delete a package. **Admin only.**\n\n**Path Parameters:**\n- `id` (string, required): Package ID\n\n**Response:**\n- Status: 200 OK\n- Body: `{ success: true, message: string, data: { message: string } }`"
+					},
+					"response": []
 				}
 			]
 		},
 		{
 			"name": "4. Bookings",
+			"description": "Booking management endpoints. All endpoints require authentication. Users can only access their own bookings unless they are admin.",
 			"item": [
 				{
-					"name": "Get All Bookings (Admin/Owner)",
+					"name": "Get All Bookings",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -556,13 +904,39 @@
 								"bookings"
 							],
 							"query": [
-								{ "key": "page", "value": "1" },
-								{ "key": "limit", "value": "10" },
-								{ "key": "userId", "value": "USER_ID_FILTER", "disabled": true },
-								{ "key": "status", "value": "CONFIRMED", "disabled": true }
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Items per page (default: 10)"
+								},
+								{
+									"key": "userId",
+									"value": "",
+									"description": "Filter by user ID (Admin only)",
+									"disabled": true
+								},
+								{
+									"key": "packageId",
+									"value": "",
+									"description": "Filter by package ID (optional)",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "pending",
+									"description": "Filter by status: pending, confirmed, canceled",
+									"disabled": true
+								}
 							]
-						}
-					}
+						},
+						"description": "Get paginated list of bookings. Users see only their own bookings. Admins see all bookings.\n\n**Query Parameters:**\n- `page` (number, optional): Page number (default: 1)\n- `limit` (number, optional): Items per page (default: 10)\n- `userId` (string, optional): Filter by user ID (Admin only)\n- `packageId` (string, optional): Filter by package ID\n- `status` (enum, optional): Filter by status - `pending`, `confirmed`, `canceled`\n\n**Response:**\n- Status: 200 OK\n- Body: `{ success: true, data: BookingListItemDto[], meta: { page, limit, total, totalPages } }`"
+					},
+					"response": []
 				},
 				{
 					"name": "Get Booking by ID",
@@ -589,10 +963,16 @@
 								":id"
 							],
 							"variable": [
-								{ "key": "id", "value": "ID_HERE" }
+								{
+									"key": "id",
+									"value": "{{bookingId}}",
+									"description": "Booking ID (MongoDB ObjectId)"
+								}
 							]
-						}
-					}
+						},
+						"description": "Get booking details by ID. Users can only view their own bookings unless they are admin.\n\n**Path Parameters:**\n- `id` (string, required): Booking ID (MongoDB ObjectId)\n\n**Response:**\n- Status: 200 OK\n- Body: `{ success: true, message: string, data: BookingDetailDto }`"
+					},
+					"response": []
 				},
 				{
 					"name": "Create Booking",
@@ -608,10 +988,15 @@
 							]
 						},
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"packageId\": \"ID_HERE\",\n    \"customerDetails\": {\n        \"governoratName\": \"Cairo\",\n        \"phoneNumber\": \"01011111111\",\n        \"name\": \"John Doe\",\n        \"email\": \"john@example.com\"\n    }\n}",
+							"raw": "{\n    \"packageId\": \"{{packageId}}\",\n    \"numberOfPeople\": 2,\n    \"totalPrice\": 599.98,\n    \"contact\": {\n        \"name\": \"John Doe\",\n        \"email\": \"john@example.com\",\n        \"phone\": \"01012345678\"\n    },\n    \"status\": \"pending\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -626,11 +1011,13 @@
 							"path": [
 								"bookings"
 							]
-						}
-					}
+						},
+						"description": "Create a new booking. **Authentication required.**\n\n**Request Body:**\n- `packageId` (string, required): Package ID (MongoDB ObjectId)\n- `numberOfPeople` (number, required): Number of people (min 1)\n- `totalPrice` (number, required): Total price (min 0)\n- `contact` (object, required): Contact information\n  - `name` (string, required): Contact name\n  - `email` (string, required): Valid email address\n  - `phone` (string, required): Phone number\n- `status` (enum, optional): Booking status - `pending`, `confirmed`, `canceled` (default: `pending`)\n\n**Response:**\n- Status: 201 Created\n- Body: `{ success: true, message: string, data: BookingDetailDto }`"
+					},
+					"response": []
 				},
 				{
-					"name": "Update Booking Status",
+					"name": "Update Booking",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -643,10 +1030,15 @@
 							]
 						},
 						"method": "PATCH",
-						"header": [],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"status\": \"CANCELLED\"\n}",
+							"raw": "{\n    \"numberOfPeople\": 3,\n    \"totalPrice\": 899.97,\n    \"status\": \"confirmed\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -663,10 +1055,16 @@
 								":id"
 							],
 							"variable": [
-								{ "key": "id", "value": "ID_HERE" }
+								{
+									"key": "id",
+									"value": "{{bookingId}}",
+									"description": "Booking ID (MongoDB ObjectId)"
+								}
 							]
-						}
-					}
+						},
+						"description": "Update booking information. Users can only update their own bookings unless they are admin.\n\n**Path Parameters:**\n- `id` (string, required): Booking ID\n\n**Request Body:**\n- `packageId` (string, optional): New package ID\n- `numberOfPeople` (number, optional): New number of people (min 1)\n- `totalPrice` (number, optional): New total price (min 0)\n- `status` (enum, optional): New status - `pending`, `confirmed`, `canceled`\n\n**Note:** Contact information cannot be updated. Contact is tied to the booking.\n\n**Response:**\n- Status: 200 OK\n- Body: `{ success: true, message: string, data: BookingDetailDto }`"
+					},
+					"response": []
 				},
 				{
 					"name": "Delete Booking (Admin Only)",
@@ -693,10 +1091,16 @@
 								":id"
 							],
 							"variable": [
-								{ "key": "id", "value": "ID_HERE" }
+								{
+									"key": "id",
+									"value": "{{bookingId}}",
+									"description": "Booking ID (MongoDB ObjectId)"
+								}
 							]
-						}
-					}
+						},
+						"description": "Delete a booking. **Admin only.**\n\n**Path Parameters:**\n- `id` (string, required): Booking ID\n\n**Response:**\n- Status: 200 OK\n- Body: `{ success: true, message: string, data: { message: string } }`"
+					},
+					"response": []
 				}
 			]
 		}
@@ -705,12 +1109,44 @@
 		{
 			"key": "baseUrl",
 			"value": "http://localhost:3000",
-			"type": "string"
+			"type": "string",
+			"description": "API base URL"
 		},
 		{
 			"key": "token",
 			"value": "YOUR_JWT_TOKEN_HERE",
-			"type": "string"
+			"type": "string",
+			"description": "JWT authentication token (auto-saved after login)"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string",
+			"description": "Current user ID (auto-saved after login)"
+		},
+		{
+			"key": "userRole",
+			"value": "",
+			"type": "string",
+			"description": "Current user role (auto-saved after login)"
+		},
+		{
+			"key": "destinationId",
+			"value": "",
+			"type": "string",
+			"description": "Destination ID for testing"
+		},
+		{
+			"key": "packageId",
+			"value": "",
+			"type": "string",
+			"description": "Package ID for testing"
+		},
+		{
+			"key": "bookingId",
+			"value": "",
+			"type": "string",
+			"description": "Booking ID for testing"
 		}
 	]
 }

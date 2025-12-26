@@ -30,8 +30,6 @@ describe('AppLogger', () => {
       error: jest.fn(),
       debug: jest.fn(),
     } as any;
-
-    (Logger as jest.Mock).mockImplementation(() => mockLogger);
   });
 
   beforeEach(async () => {

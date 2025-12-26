@@ -383,11 +383,11 @@ describe('BookingsService', () => {
         packageId: 'newPackageId',
       };
       const updateData = {
-        packageId: 'newPackageId',
+        packageId: new Types.ObjectId('newPackageId') as any,
       };
       const updatedBooking = {
         ...mockBookingDoc,
-        packageId: 'newPackageId',
+        packageId: new Types.ObjectId('newPackageId'),
       };
       const expectedDetailDto = {
         id: mockBookingId,
