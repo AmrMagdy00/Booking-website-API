@@ -80,10 +80,7 @@ export class DestinationsController {
   @Delete(':id')
   @UseGuards(AuthRolesGuard)
   @Roles(UserRole.ADMIN)
-  async delete(
-    @Param('id') id: string,
-    @CurrentUser() user: JWTPayloadType,
-  ) {
+  async delete(@Param('id') id: string, @CurrentUser() user: JWTPayloadType) {
     const result = await this.destinationsService.delete(id, user);
     return ResponseService.successResponse(result, result.message);
   }

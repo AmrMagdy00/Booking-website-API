@@ -4,6 +4,8 @@ export class DestinationListItemDto {
   _id: string;
   name: string;
   image: Image;
+  packagesCount: number;
+  minPrice: number | null;
 }
 
 export class DestinationDetailDto {
@@ -11,6 +13,8 @@ export class DestinationDetailDto {
   name: string;
   description: string;
   image: Image;
+  packagesCount: number;
+  minPrice: number | null;
   createdAt: Date;
   updatedAt: Date;
 }

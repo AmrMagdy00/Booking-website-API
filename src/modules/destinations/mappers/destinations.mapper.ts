@@ -1,15 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { Destination } from '../schema/destination.schema';
+import { Destination } from '@/modules/destinations/schema/destination.schema';
 import {
   DestinationListItemDto,
   DestinationDetailDto,
-} from '../dtos/destination-response.dto';
-import { CreateDestinationDto } from '../dtos/create-destination.dto';
-import { UpdateDestinationDto } from '../dtos/update-destination.dto';
+} from '@/modules/destinations/dtos/destination-response.dto';
+import { CreateDestinationDto } from '@/modules/destinations/dtos/create-destination.dto';
+import { UpdateDestinationDto } from '@/modules/destinations/dtos/update-destination.dto';
 
 @Injectable()
 export class DestinationsMapper {
-  toListItemDto(destination: Destination): DestinationListItemDto {
+  toListItemDto(
+    destination: Destination,
+    packagesCount: number = 0,
+    minPrice: number | null = null,
+  ): DestinationListItemDto {
     return {
       _id: destination._id.toString(),
       name: destination.name,
@@ -17,14 +21,30 @@ export class DestinationsMapper {
         url: destination.image.url,
         publicId: destination.image.publicId,
       },
+      packagesCount,
+      minPrice,
     };
   }
 
-  toListItemDtoArray(destinations: Destination[]): DestinationListItemDto[] {
-    return destinations.map((destination) => this.toListItemDto(destination));
+  toListItemDtoArray(
+    destinations: Destination[],
+    statsMap?: Map<string, { count: number; minPrice: number | null }>,
+  ): DestinationListItemDto[] {
+    return destinations.map((destination) => {
+      const destinationId = destination._id.toString();
+      const stats = statsMap?.get(destinationId) || {
+        count: 0,
+        minPrice: null,
+      };
+      return this.toListItemDto(destination, stats.count, stats.minPrice);
+    });
   }
 
-  toDetailDto(destination: Destination): DestinationDetailDto {
+  toDetailDto(
+    destination: Destination,
+    packagesCount: number = 0,
+    minPrice: number | null = null,
+  ): DestinationDetailDto {
     return {
       _id: destination._id.toString(),
       name: destination.name,
@@ -33,6 +53,8 @@ export class DestinationsMapper {
         url: destination.image.url,
         publicId: destination.image.publicId,
       },
+      packagesCount,
+      minPrice,
       createdAt: (destination as any).createdAt,
       updatedAt: (destination as any).updatedAt,
     };

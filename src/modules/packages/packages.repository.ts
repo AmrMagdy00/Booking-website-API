@@ -84,4 +84,76 @@ export class PackagesRepository {
   async deleteById(id: string): Promise<PackageDocument | null> {
     return await this.packageModel.findByIdAndDelete(id).exec();
   }
+
+  /**
+   * Gets packages statistics for a destination
+   * @param destinationId - Destination ObjectId
+   * @returns Object containing packages count and minimum price
+   */
+  async getPackagesStatsByDestinationId(destinationId: string): Promise<{
+    count: number;
+    minPrice: number | null;
+  }> {
+    const stats = await this.packageModel.aggregate([
+      { $match: { destinationId: new Types.ObjectId(destinationId) } },
+      {
+        $group: {
+          _id: null,
+          count: { $sum: 1 },
+          minPrice: { $min: '$price' },
+        },
+      },
+    ]);
+
+    if (stats.length === 0) {
+      return { count: 0, minPrice: null };
+    }
+
+    return {
+      count: stats[0].count,
+      minPrice: stats[0].minPrice,
+    };
+  }
+
+  /**
+   * Gets packages statistics for multiple destinations
+   * @param destinationIds - Array of Destination ObjectIds
+   * @returns Map of destinationId to stats (count and minPrice)
+   */
+  async getPackagesStatsByDestinationIds(
+    destinationIds: string[],
+  ): Promise<Map<string, { count: number; minPrice: number | null }>> {
+    const objectIds = destinationIds.map((id) => new Types.ObjectId(id));
+
+    const stats = await this.packageModel.aggregate([
+      { $match: { destinationId: { $in: objectIds } } },
+      {
+        $group: {
+          _id: '$destinationId',
+          count: { $sum: 1 },
+          minPrice: { $min: '$price' },
+        },
+      },
+    ]);
+
+    const statsMap = new Map<
+      string,
+      { count: number; minPrice: number | null }
+    >();
+
+    // Initialize all destinations with zero stats
+    destinationIds.forEach((id) => {
+      statsMap.set(id, { count: 0, minPrice: null });
+    });
+
+    // Update with actual stats
+    stats.forEach((stat) => {
+      statsMap.set(stat._id.toString(), {
+        count: stat.count,
+        minPrice: stat.minPrice,
+      });
+    });
+
+    return statsMap;
+  }
 }

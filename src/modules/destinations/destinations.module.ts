@@ -9,6 +9,7 @@ import { CommonModule } from '@/common/common.module';
 import { CloudinaryModule } from '@/shared/modules/cloudinary.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { UsersModule } from '@/modules/users/users.module';
+import { PackagesModule } from '@/modules/packages/packages.module';
 
 @Module({
   imports: [
@@ -19,13 +20,10 @@ import { UsersModule } from '@/modules/users/users.module';
     CloudinaryModule,
     forwardRef(() => AuthModule),
     forwardRef(() => UsersModule),
+    forwardRef(() => PackagesModule),
   ],
   controllers: [DestinationsController],
-  providers: [
-    DestinationsService,
-    DestinationsRepository,
-    DestinationsMapper,
-  ],
+  providers: [DestinationsService, DestinationsRepository, DestinationsMapper],
   exports: [DestinationsService],
 })
 export class DestinationsModule {}

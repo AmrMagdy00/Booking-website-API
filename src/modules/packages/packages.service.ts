@@ -3,6 +3,8 @@ import {
   NotFoundException,
   BadRequestException,
   InternalServerErrorException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { PackagesRepository } from './packages.repository';
 import { PackagesMapper } from './mappers/packages.mapper';
@@ -28,6 +30,7 @@ export class PackagesService {
     private readonly packagesMapper: PackagesMapper,
     private readonly cloudinaryService: CloudinaryService,
     private readonly logger: AppLogger,
+    @Inject(forwardRef(() => DestinationsService))
     private readonly destinationsService: DestinationsService,
   ) {}
 
@@ -196,9 +199,9 @@ export class PackagesService {
     file?: Express.Multer.File,
   ): Promise<PackageDetailDto> {
     try {
-      this.logger.info('Admin updating package', { 
-        packageId: id, 
-        actorId: currentUser.id 
+      this.logger.info('Admin updating package', {
+        packageId: id,
+        actorId: currentUser.id,
       });
 
       const existingPackage = await this.packagesRepository.findById(id);
@@ -272,11 +275,14 @@ export class PackagesService {
     }
   }
 
-  async delete(id: string, currentUser: JWTPayloadType): Promise<{ message: string }> {
+  async delete(
+    id: string,
+    currentUser: JWTPayloadType,
+  ): Promise<{ message: string }> {
     try {
-      this.logger.info('Admin deleting package', { 
-        packageId: id, 
-        actorId: currentUser.id 
+      this.logger.info('Admin deleting package', {
+        packageId: id,
+        actorId: currentUser.id,
       });
 
       // Find package to get image publicId
@@ -319,5 +325,32 @@ export class PackagesService {
       this.logger.error('Failed to delete package', { error, packageId: id });
       throw new InternalServerErrorException('Failed to delete package');
     }
+  }
+
+  /**
+   * Gets packages statistics for a destination
+   * @param destinationId - Destination ID
+   * @returns Object containing packages count and minimum price
+   */
+  async getPackagesStatsByDestinationId(destinationId: string): Promise<{
+    count: number;
+    minPrice: number | null;
+  }> {
+    return await this.packagesRepository.getPackagesStatsByDestinationId(
+      destinationId,
+    );
+  }
+
+  /**
+   * Gets packages statistics for multiple destinations
+   * @param destinationIds - Array of Destination IDs
+   * @returns Map of destinationId to stats (count and minPrice)
+   */
+  async getPackagesStatsByDestinationIds(
+    destinationIds: string[],
+  ): Promise<Map<string, { count: number; minPrice: number | null }>> {
+    return await this.packagesRepository.getPackagesStatsByDestinationIds(
+      destinationIds,
+    );
   }
 }

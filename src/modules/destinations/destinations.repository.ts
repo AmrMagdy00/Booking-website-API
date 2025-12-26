@@ -36,9 +36,7 @@ export class DestinationsRepository {
   }
 
   async findById(id: string): Promise<Destination | null> {
-    return this.destinationModel
-      .findOne({ _id: id, deletedAt: null })
-      .exec();
+    return this.destinationModel.findOne({ _id: id, deletedAt: null }).exec();
   }
 
   async updateById(id: string, data: any): Promise<Destination | null> {
