@@ -25,7 +25,6 @@ import { JWTPayloadType } from '@/common/auth/types/jwt-payload.type';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  
   @Get()
   @Roles(UserRole.ADMIN)
   async findAll(
@@ -35,16 +34,13 @@ export class UsersController {
     const result = await this.usersService.findAll(query, user);
     return ResponseService.paginatedResponse(result.items, result.meta);
   }
-  
+
   @Get(':id')
-  async findById(
-    @Param('id') id: string,
-    @CurrentUser() user: JWTPayloadType,
-  ) {
+  async findById(@Param('id') id: string, @CurrentUser() user: JWTPayloadType) {
     const result = await this.usersService.findById(id, user);
     return ResponseService.successResponse(result, 'User fetched successfully');
   }
-  
+
   @Post()
   @Roles(UserRole.ADMIN)
   async create(
@@ -66,10 +62,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  async delete(
-    @Param('id') id: string,
-    @CurrentUser() user: JWTPayloadType,
-  ) {
+  async delete(@Param('id') id: string, @CurrentUser() user: JWTPayloadType) {
     const result = await this.usersService.delete(id, user);
     return ResponseService.successResponse(result, result.message);
   }

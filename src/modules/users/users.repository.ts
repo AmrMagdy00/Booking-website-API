@@ -27,18 +27,14 @@ export class UsersRepository {
         .limit(limit)
         .sort({ createdAt: -1 })
         .exec(),
-      this.userModel
-        .countDocuments({ ...query, deletedAt: null })
-        .exec(),
+      this.userModel.countDocuments({ ...query, deletedAt: null }).exec(),
     ]);
 
     return { users, total };
   }
 
   async findById(id: string): Promise<UserDocument | null> {
-    return this.userModel
-      .findOne({ _id: id, deletedAt: null })
-      .exec();
+    return this.userModel.findOne({ _id: id, deletedAt: null }).exec();
   }
 
   async findByEmail(email: string): Promise<UserDocument | null> {
@@ -54,7 +50,10 @@ export class UsersRepository {
       .exec();
   }
 
-  async updateById(id: string, data: Partial<User>): Promise<UserDocument | null> {
+  async updateById(
+    id: string,
+    data: Partial<User>,
+  ): Promise<UserDocument | null> {
     return this.userModel
       .findOneAndUpdate({ _id: id, deletedAt: null }, data, { new: true })
       .exec();

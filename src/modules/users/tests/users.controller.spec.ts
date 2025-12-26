@@ -1,14 +1,24 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UsersController } from '../users.controller';
-import { UsersService } from '../users.service';
-import { UserRole } from '../enums/user-role.enum';
+import { UsersController } from '@/modules/users/users.controller';
+import { UsersService } from '@/modules/users/users.service';
+import { UserRole } from '@/modules/users/enums/user-role.enum';
 
 describe('UsersController', () => {
   let controller: UsersController;
   let service: jest.Mocked<UsersService>;
 
-  const mockAdmin = { id: 'admin1', email: 'admin@test.com', userName: 'admin', role: UserRole.ADMIN };
-  const mockUser = { id: 'user1', email: 'user@test.com', userName: 'user1', role: UserRole.NORMAL_USER };
+  const mockAdmin = {
+    id: 'admin1',
+    email: 'admin@test.com',
+    userName: 'admin',
+    role: UserRole.ADMIN,
+  };
+  const mockUser = {
+    id: 'user1',
+    email: 'user@test.com',
+    userName: 'user1',
+    role: UserRole.NORMAL_USER,
+  };
 
   const mockUserResponse = {
     id: 'user1',
@@ -35,15 +45,21 @@ describe('UsersController', () => {
     }).compile();
 
     controller = module.get<UsersController>(UsersController);
-    service = module.get(UsersService) as any;
+    service = module.get(UsersService);
   });
 
   describe('findAll', () => {
     it('should return list of users', async () => {
-      const mockResult = { items: [mockUserResponse], meta: { total: 1, page: 1, limit: 10, totalPages: 1 } };
+      const mockResult = {
+        items: [mockUserResponse],
+        meta: { total: 1, page: 1, limit: 10, totalPages: 1 },
+      };
       service.findAll.mockResolvedValue(mockResult as any);
 
-      const result = await controller.findAll({ page: 1, limit: 10 }, mockAdmin as any);
+      const result = await controller.findAll(
+        { page: 1, limit: 10 },
+        mockAdmin as any,
+      );
 
       expect(result.data).toEqual(mockResult.items);
       expect(service.findAll).toHaveBeenCalled();

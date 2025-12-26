@@ -6,7 +6,7 @@ import { UsersRepository } from './users.repository';
 import { UsersMapper } from './users.mapper';
 import { User, UserSchema } from './schema/user.schema';
 import { CommonModule } from '@/common/common.module';
-import { AuthModule } from '../auth/auth.module';
+import { AuthModule } from '@/modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -16,6 +16,6 @@ import { AuthModule } from '../auth/auth.module';
   ],
   controllers: [UsersController],
   providers: [UsersService, UsersRepository, UsersMapper],
-  exports: [UsersService],
+  exports: [UsersService, UsersRepository, UsersMapper],
 })
 export class UsersModule {}

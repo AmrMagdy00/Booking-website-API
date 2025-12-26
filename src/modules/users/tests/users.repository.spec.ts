@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
-import { UsersRepository } from '../users.repository';
-import { User } from '../schema/user.schema';
+import { UsersRepository } from '@/modules/users/users.repository';
+import { User } from '@/modules/users/schema/user.schema';
 import { Types } from 'mongoose';
 
 describe('UsersRepository', () => {
@@ -51,7 +51,9 @@ describe('UsersRepository', () => {
 
   describe('create', () => {
     it('should call model create', async () => {
-      const spy = jest.spyOn(model, 'create').mockResolvedValue(mockUser as any);
+      const spy = jest
+        .spyOn(model, 'create')
+        .mockResolvedValue(mockUser as any);
       await repository.create({ email: 'test@test.com' } as any);
       expect(spy).toHaveBeenCalled();
     });

@@ -1,4 +1,4 @@
-import { UserRole } from '../enums/user-role.enum';
+import { UserRole } from '@/modules/users/enums/user-role.enum';
 
 export class UserResponseDto {
   _id: string;

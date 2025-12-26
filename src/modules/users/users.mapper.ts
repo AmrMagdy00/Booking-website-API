@@ -35,7 +35,7 @@ export class UsersMapper {
     const updateData: Partial<User> = {};
     if (dto.userName) updateData.userName = dto.userName;
     if (dto.email) updateData.email = dto.email.toLowerCase();
-    if (dto.password) updateData.password = dto.password; 
+    if (dto.password) updateData.password = dto.password;
     if (dto.role) updateData.role = dto.role;
     return updateData;
   }

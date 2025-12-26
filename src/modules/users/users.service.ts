@@ -25,21 +25,23 @@ export class UsersService {
     private readonly logger: AppLogger,
   ) {}
 
-  
-  async findAll(queryDto: QueryUserDto, currentUser: JWTPayloadType): Promise<{
+  async findAll(
+    queryDto: QueryUserDto,
+    currentUser: JWTPayloadType,
+  ): Promise<{
     items: UserResponseDto[];
     meta: { page: number; limit: number; total: number; totalPages: number };
   }> {
     try {
       const page = queryDto.page || 1;
       const limit = queryDto.limit || 10;
-      
-      this.logger.info('Admin fetching users', { 
+
+      this.logger.info('Admin fetching users', {
         actorId: currentUser.id,
-        page, 
-        limit 
+        page,
+        limit,
       });
-      
+
       const query: any = {};
       if (queryDto.userName) {
         query.userName = { $regex: queryDto.userName, $options: 'i' };
@@ -47,16 +49,16 @@ export class UsersService {
       if (queryDto.email) {
         query.email = { $regex: queryDto.email, $options: 'i' };
       }
-      
+
       const { users, total } = await this.usersRepository.findAll(
         query,
         page,
         limit,
       );
-      
+
       const items = this.usersMapper.toResponseDtoArray(users);
       const totalPages = Math.ceil(total / limit);
-      
+
       return {
         items,
         meta: { page, limit, total, totalPages },
@@ -66,13 +68,18 @@ export class UsersService {
       throw new InternalServerErrorException('Failed to fetch users');
     }
   }
-  
-  async findById(id: string, currentUser: JWTPayloadType): Promise<UserResponseDto> {
+
+  async findById(
+    id: string,
+    currentUser: JWTPayloadType,
+  ): Promise<UserResponseDto> {
     try {
       this.logger.info('Fetching user by ID', { id, actor: currentUser.id });
 
       if (currentUser.role !== UserRole.ADMIN && currentUser.id !== id) {
-        throw new ForbiddenException('You are not allowed to view this profile');
+        throw new ForbiddenException(
+          'You are not allowed to view this profile',
+        );
       }
 
       const user = await this.usersRepository.findById(id);
@@ -80,21 +87,31 @@ export class UsersService {
         this.logger.warn('User not found', { id });
         throw new NotFoundException('User not found');
       }
-      
+
       return this.usersMapper.toResponseDto(user);
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ForbiddenException) throw error;
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      )
+        throw error;
       this.logger.error('Failed to fetch user', { error, id });
       throw new InternalServerErrorException('Failed to fetch user');
     }
   }
-  
-  async create(dto: CreateUserDto, currentUser?: JWTPayloadType): Promise<UserResponseDto> {
+
+  async create(
+    dto: CreateUserDto,
+    currentUser?: JWTPayloadType,
+  ): Promise<UserResponseDto> {
     try {
-      this.logger.info(currentUser ? 'Admin creating new user' : 'Public self-registration', { 
-        email: dto.email, 
-        actorId: currentUser?.id 
-      });
+      this.logger.info(
+        currentUser ? 'Admin creating new user' : 'Public self-registration',
+        {
+          email: dto.email,
+          actorId: currentUser?.id,
+        },
+      );
 
       const existingUser = await this.usersRepository.findByEmail(dto.email);
       if (existingUser) {
@@ -103,7 +120,7 @@ export class UsersService {
       }
 
       const userData = this.usersMapper.toPersistence(dto);
-      
+
       userData.password = await this.hashPassword(dto.password);
 
       const createdUser = await this.usersRepository.create(userData);
@@ -116,12 +133,11 @@ export class UsersService {
       throw new InternalServerErrorException('Failed to create user');
     }
   }
- 
+
   async getCurrentUser(id: string): Promise<UserDocument | null> {
     return this.usersRepository.findById(id);
   }
 
-  
   async findByEmailWithPassword(email: string): Promise<UserDocument | null> {
     return this.usersRepository.findByEmailWithPassword(email);
   }
@@ -135,7 +151,9 @@ export class UsersService {
       this.logger.info('Updating user', { id, actor: currentUser.id });
 
       if (currentUser.role !== UserRole.ADMIN && currentUser.id !== id) {
-        throw new ForbiddenException('You are not allowed to update this profile');
+        throw new ForbiddenException(
+          'You are not allowed to update this profile',
+        );
       }
 
       const existingUser = await this.usersRepository.findById(id);
@@ -145,7 +163,7 @@ export class UsersService {
       }
 
       const updateData = this.usersMapper.toUpdatePersistence(dto);
-      
+
       if (dto.password) {
         updateData.password = await this.hashPassword(dto.password);
       }
@@ -158,18 +176,27 @@ export class UsersService {
       this.logger.info('User updated successfully', { id });
       return this.usersMapper.toResponseDto(updatedUser);
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ForbiddenException) throw error;
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      )
+        throw error;
       this.logger.error('Failed to update user', { error, id, dto });
       throw new InternalServerErrorException('Failed to update user');
     }
   }
 
-  async delete(id: string, currentUser: JWTPayloadType): Promise<{ message: string }> {
+  async delete(
+    id: string,
+    currentUser: JWTPayloadType,
+  ): Promise<{ message: string }> {
     try {
       this.logger.info('Deleting user', { id, actor: currentUser.id });
 
       if (currentUser.role !== UserRole.ADMIN && currentUser.id !== id) {
-        throw new ForbiddenException('You are not allowed to delete this profile');
+        throw new ForbiddenException(
+          'You are not allowed to delete this profile',
+        );
       }
 
       const deletedUser = await this.usersRepository.deleteById(id);
@@ -181,7 +208,11 @@ export class UsersService {
       this.logger.info('User deleted successfully', { id });
       return { message: 'User deleted successfully' };
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ForbiddenException) throw error;
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      )
+        throw error;
       this.logger.error('Failed to delete user', { error, id });
       throw new InternalServerErrorException('Failed to delete user');
     }

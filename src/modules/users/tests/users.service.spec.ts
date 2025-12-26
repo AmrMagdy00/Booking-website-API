@@ -1,10 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UsersService } from '../users.service';
-import { UsersRepository } from '../users.repository';
-import { UsersMapper } from '../users.mapper';
+import { UsersService } from '@/modules/users/users.service';
+import { UsersRepository } from '@/modules/users/users.repository';
+import { UsersMapper } from '@/modules/users/users.mapper';
 import { AppLogger } from '@/common/logger/app-logger.service';
-import { UserRole } from '../enums/user-role.enum';
-import { ForbiddenException, NotFoundException, ConflictException } from '@nestjs/common';
+import { UserRole } from '@/modules/users/enums/user-role.enum';
+import {
+  ForbiddenException,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
 jest.mock('bcrypt');
@@ -15,9 +19,24 @@ describe('UsersService', () => {
   let mapper: jest.Mocked<UsersMapper>;
   let logger: jest.Mocked<AppLogger>;
 
-  const mockAdmin = { id: 'admin1', email: 'admin@test.com', userName: 'admin', role: UserRole.ADMIN };
-  const mockUser = { id: 'user1', email: 'user@test.com', userName: 'user1', role: UserRole.NORMAL_USER };
-  const otherUser = { id: 'user2', email: 'other@test.com', userName: 'user2', role: UserRole.NORMAL_USER };
+  const mockAdmin = {
+    id: 'admin1',
+    email: 'admin@test.com',
+    userName: 'admin',
+    role: UserRole.ADMIN,
+  };
+  const mockUser = {
+    id: 'user1',
+    email: 'user@test.com',
+    userName: 'user1',
+    role: UserRole.NORMAL_USER,
+  };
+  const otherUser = {
+    id: 'user2',
+    email: 'other@test.com',
+    userName: 'user2',
+    role: UserRole.NORMAL_USER,
+  };
 
   const mockUserDoc = {
     _id: 'user1',
@@ -64,9 +83,9 @@ describe('UsersService', () => {
     }).compile();
 
     service = module.get<UsersService>(UsersService);
-    repository = module.get(UsersRepository) as any;
-    mapper = module.get(UsersMapper) as any;
-    logger = module.get(AppLogger) as any;
+    repository = module.get(UsersRepository);
+    mapper = module.get(UsersMapper);
+    logger = module.get(AppLogger);
 
     (bcrypt.genSalt as jest.Mock).mockResolvedValue('salt');
     (bcrypt.hash as jest.Mock).mockResolvedValue('hashedPassword');
@@ -90,12 +109,18 @@ describe('UsersService', () => {
     });
 
     it('should throw ForbiddenException if User tries to find others', async () => {
-      await expect(service.findById('user2', mockUser as any)).rejects.toThrow(ForbiddenException);
+      await expect(service.findById('user2', mockUser as any)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 
   describe('create', () => {
-    const createDto = { userName: 'new', email: 'new@test.com', password: 'password123' };
+    const createDto = {
+      userName: 'new',
+      email: 'new@test.com',
+      password: 'password123',
+    };
 
     it('should create a user and hash password', async () => {
       repository.findByEmail.mockResolvedValue(null);
@@ -111,22 +136,31 @@ describe('UsersService', () => {
 
     it('should throw ConflictException if email exists', async () => {
       repository.findByEmail.mockResolvedValue(mockUserDoc as any);
-      await expect(service.create(createDto as any)).rejects.toThrow(ConflictException);
+      await expect(service.create(createDto as any)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
   describe('update', () => {
     it('should allow owner to update their profile', async () => {
       repository.findById.mockResolvedValue(mockUserDoc as any);
-      mapper.toUpdatePersistence.mockReturnValue({ userName: 'updated' } as any);
-      repository.updateById.mockResolvedValue({ ...mockUserDoc, userName: 'updated' } as any);
+      mapper.toUpdatePersistence.mockReturnValue({
+        userName: 'updated',
+      } as any);
+      repository.updateById.mockResolvedValue({
+        ...mockUserDoc,
+        userName: 'updated',
+      } as any);
 
       await service.update('user1', { userName: 'updated' }, mockUser as any);
       expect(repository.updateById).toHaveBeenCalled();
     });
 
     it('should throw ForbiddenException if non-owner/non-admin tries to update', async () => {
-      await expect(service.update('user2', {}, mockUser as any)).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.update('user2', {}, mockUser as any),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 
@@ -138,7 +172,9 @@ describe('UsersService', () => {
     });
 
     it('should throw ForbiddenException if user tries to delete another', async () => {
-      await expect(service.delete('user2', mockUser as any)).rejects.toThrow(ForbiddenException);
+      await expect(service.delete('user2', mockUser as any)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 });
