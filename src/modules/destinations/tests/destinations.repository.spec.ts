@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
-import { DestinationsRepository } from '../destinations.repository';
-import { Destination } from '../schema/destination.schema';
+import { DestinationsRepository } from '@/modules/destinations/destinations.repository';
+import { Destination } from '@/modules/destinations/schema/destination.schema';
 import { Types } from 'mongoose';
 
 describe('DestinationsRepository', () => {
@@ -57,7 +57,9 @@ describe('DestinationsRepository', () => {
 
   describe('create', () => {
     it('should call model create', async () => {
-      const spy = jest.spyOn(model, 'create').mockResolvedValue(mockDestination as any);
+      const spy = jest
+        .spyOn(model, 'create')
+        .mockResolvedValue(mockDestination as any);
       await repository.create({ name: 'Paris' } as any);
       expect(spy).toHaveBeenCalled();
     });

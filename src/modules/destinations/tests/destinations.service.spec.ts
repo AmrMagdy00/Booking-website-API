@@ -1,11 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DestinationsService } from '../destinations.service';
-import { DestinationsRepository } from '../destinations.repository';
-import { DestinationsMapper } from '../mappers/destinations.mapper';
+import { DestinationsService } from '@/modules/destinations/destinations.service';
+import { DestinationsRepository } from '@/modules/destinations/destinations.repository';
+import { DestinationsMapper } from '@/modules/destinations/mappers/destinations.mapper';
 import { CloudinaryService } from '@/shared/services/cloudinary.service';
 import { AppLogger } from '@/common/logger/app-logger.service';
 import { Types } from 'mongoose';
-import { NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import {
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { UserRole } from '@/modules/users/enums/user-role.enum';
 
 describe('DestinationsService', () => {
@@ -75,17 +79,20 @@ describe('DestinationsService', () => {
     }).compile();
 
     service = module.get<DestinationsService>(DestinationsService);
-    repository = module.get(DestinationsRepository) as any;
-    mapper = module.get(DestinationsMapper) as any;
-    cloudinary = module.get(CloudinaryService) as any;
-    logger = module.get(AppLogger) as any;
+    repository = module.get(DestinationsRepository);
+    mapper = module.get(DestinationsMapper);
+    cloudinary = module.get(CloudinaryService);
+    logger = module.get(AppLogger);
   });
 
   describe('findAll', () => {
     it('should return paginated destinations', async () => {
       const mockItems = [mockDestinationDoc];
       const mockMeta = { total: 1, page: 1, limit: 10, totalPages: 1 };
-      repository.findAll.mockResolvedValue({ destinations: mockItems, total: 1 });
+      repository.findAll.mockResolvedValue({
+        destinations: mockItems,
+        total: 1,
+      });
       mapper.toListItemDtoArray.mockReturnValue(mockItems as any);
 
       const result = await service.findAll({ page: 1, limit: 10 });
@@ -97,14 +104,16 @@ describe('DestinationsService', () => {
 
     it('should throw InternalServerErrorException on database error', async () => {
       repository.findAll.mockRejectedValue(new Error('DB Error'));
-      await expect(service.findAll({})).rejects.toThrow(InternalServerErrorException);
+      await expect(service.findAll({})).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
   });
 
   describe('findById', () => {
     it('should return destination when found', async () => {
       repository.findById.mockResolvedValue(mockDestinationDoc);
-      mapper.toDetailDto.mockReturnValue(mockDestinationDoc as any);
+      mapper.toDetailDto.mockReturnValue(mockDestinationDoc);
 
       const result = await service.findById(mockDestinationId);
 
@@ -114,32 +123,48 @@ describe('DestinationsService', () => {
 
     it('should throw NotFoundException when not found', async () => {
       repository.findById.mockResolvedValue(null);
-      await expect(service.findById(mockDestinationId)).rejects.toThrow(NotFoundException);
+      await expect(service.findById(mockDestinationId)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('create', () => {
-    const createDto = { name: 'Paris', description: 'City', location: 'France' };
+    const createDto = {
+      name: 'Paris',
+      description: 'City',
+      location: 'France',
+    };
     const mockFile = { buffer: Buffer.from('test') } as Express.Multer.File;
 
     it('should create destination with image', async () => {
       mapper.toPersistence.mockReturnValue({ ...createDto } as any);
-      cloudinary.uploadImageFromBuffer.mockResolvedValue({ url: 'new-url', publicId: 'new-id' });
+      cloudinary.uploadImageFromBuffer.mockResolvedValue({
+        url: 'new-url',
+        publicId: 'new-id',
+      });
       repository.create.mockResolvedValue(mockDestinationDoc);
-      mapper.toDetailDto.mockReturnValue(mockDestinationDoc as any);
+      mapper.toDetailDto.mockReturnValue(mockDestinationDoc);
 
       const result = await service.create(createDto as any, mockUser, mockFile);
 
       expect(result).toBeDefined();
-      expect(cloudinary.uploadImageFromBuffer).toHaveBeenCalledWith(mockFile.buffer, 'destinations');
-      expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({
-        image: { url: 'new-url', publicId: 'new-id' }
-      }));
+      expect(cloudinary.uploadImageFromBuffer).toHaveBeenCalledWith(
+        mockFile.buffer,
+        'destinations',
+      );
+      expect(repository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          image: { url: 'new-url', publicId: 'new-id' },
+        }),
+      );
     });
 
     it('should throw BadRequestException if creation fails', async () => {
       cloudinary.uploadImageFromBuffer.mockRejectedValue(new Error('fail'));
-      await expect(service.create(createDto as any, mockUser, mockFile)).rejects.toThrow(BadRequestException);
+      await expect(
+        service.create(createDto as any, mockUser, mockFile),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -149,35 +174,62 @@ describe('DestinationsService', () => {
     it('should update destination without changing image', async () => {
       repository.findById.mockResolvedValue(mockDestinationDoc);
       mapper.toUpdatePersistence.mockReturnValue({ ...updateDto } as any);
-      repository.updateById.mockResolvedValue({ ...mockDestinationDoc, ...updateDto });
-      mapper.toDetailDto.mockReturnValue({ ...mockDestinationDoc, ...updateDto } as any);
+      repository.updateById.mockResolvedValue({
+        ...mockDestinationDoc,
+        ...updateDto,
+      });
+      mapper.toDetailDto.mockReturnValue({
+        ...mockDestinationDoc,
+        ...updateDto,
+      });
 
-      const result = await service.update(mockDestinationId, updateDto, mockUser);
+      const result = await service.update(
+        mockDestinationId,
+        updateDto,
+        mockUser,
+      );
 
       expect(result).toBeDefined();
       expect(cloudinary.deleteImage).not.toHaveBeenCalled();
-      expect(repository.updateById).toHaveBeenCalledWith(mockDestinationId, expect.not.objectContaining({ image: expect.anything() }));
+      expect(repository.updateById).toHaveBeenCalledWith(
+        mockDestinationId,
+        expect.not.objectContaining({ image: expect.anything() }),
+      );
     });
 
     it('should update destination and replace image if file provided', async () => {
       const mockFile = { buffer: Buffer.from('test') } as Express.Multer.File;
       repository.findById.mockResolvedValue(mockDestinationDoc);
       mapper.toUpdatePersistence.mockReturnValue({ ...updateDto } as any);
-      cloudinary.uploadImageFromBuffer.mockResolvedValue({ url: 'new-url', publicId: 'new-id' });
-      repository.updateById.mockResolvedValue({ ...mockDestinationDoc, ...updateDto, image: { url: 'new-url', publicId: 'new-id' } });
+      cloudinary.uploadImageFromBuffer.mockResolvedValue({
+        url: 'new-url',
+        publicId: 'new-id',
+      });
+      repository.updateById.mockResolvedValue({
+        ...mockDestinationDoc,
+        ...updateDto,
+        image: { url: 'new-url', publicId: 'new-id' },
+      });
 
       await service.update(mockDestinationId, updateDto, mockUser, mockFile);
 
-      expect(cloudinary.deleteImage).toHaveBeenCalledWith(mockDestinationDoc.image.publicId);
+      expect(cloudinary.deleteImage).toHaveBeenCalledWith(
+        mockDestinationDoc.image.publicId,
+      );
       expect(cloudinary.uploadImageFromBuffer).toHaveBeenCalled();
-      expect(repository.updateById).toHaveBeenCalledWith(mockDestinationId, expect.objectContaining({
-        image: { url: 'new-url', publicId: 'new-id' }
-      }));
+      expect(repository.updateById).toHaveBeenCalledWith(
+        mockDestinationId,
+        expect.objectContaining({
+          image: { url: 'new-url', publicId: 'new-id' },
+        }),
+      );
     });
 
-    it('should throw NotFoundException if destination doesn\'t exist', async () => {
+    it("should throw NotFoundException if destination doesn't exist", async () => {
       repository.findById.mockResolvedValue(null);
-      await expect(service.update(mockDestinationId, {}, mockUser)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update(mockDestinationId, {}, mockUser),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -189,7 +241,9 @@ describe('DestinationsService', () => {
       const result = await service.delete(mockDestinationId, mockUser);
 
       expect(result).toEqual({ message: 'Destination deleted successfully' });
-      expect(cloudinary.deleteImage).toHaveBeenCalledWith(mockDestinationDoc.image.publicId);
+      expect(cloudinary.deleteImage).toHaveBeenCalledWith(
+        mockDestinationDoc.image.publicId,
+      );
       expect(repository.deleteById).toHaveBeenCalledWith(mockDestinationId);
     });
 

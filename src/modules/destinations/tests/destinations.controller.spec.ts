@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DestinationsController } from '../destinations.controller';
-import { DestinationsService } from '../destinations.service';
+import { DestinationsController } from '@/modules/destinations/destinations.controller';
+import { DestinationsService } from '@/modules/destinations/destinations.service';
 import { UserRole } from '@/modules/users/enums/user-role.enum';
 
 describe('DestinationsController', () => {
@@ -40,14 +40,14 @@ describe('DestinationsController', () => {
     }).compile();
 
     controller = module.get<DestinationsController>(DestinationsController);
-    service = module.get(DestinationsService) as any;
+    service = module.get(DestinationsService);
   });
 
   describe('findAll', () => {
     it('should return paginated destinations in standard format', async () => {
-      const mockResult = { 
-        items: [mockDestination], 
-        meta: { total: 1, page: 1, limit: 10, totalPages: 1 } 
+      const mockResult = {
+        items: [mockDestination],
+        meta: { total: 1, page: 1, limit: 10, totalPages: 1 },
       };
       service.findAll.mockResolvedValue(mockResult as any);
 
@@ -73,15 +73,27 @@ describe('DestinationsController', () => {
 
   describe('create', () => {
     it('should create a new destination and return success', async () => {
-      const createDto = { name: 'Paris', description: 'City', location: 'France' };
+      const createDto = {
+        name: 'Paris',
+        description: 'City',
+        location: 'France',
+      };
       const mockFile = {} as Express.Multer.File;
       service.create.mockResolvedValue(mockDestination as any);
 
-      const result = await controller.create(createDto as any, mockUser, mockFile);
+      const result = await controller.create(
+        createDto as any,
+        mockUser,
+        mockFile,
+      );
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockDestination);
-      expect(service.create).toHaveBeenCalledWith(createDto, mockUser, mockFile);
+      expect(service.create).toHaveBeenCalledWith(
+        createDto,
+        mockUser,
+        mockFile,
+      );
     });
   });
 
@@ -91,11 +103,21 @@ describe('DestinationsController', () => {
       service.update.mockResolvedValue(mockDestination as any);
 
       // In controller, update(id, dto, user, file?) -> file is undefined if not passed
-      const result = await controller.update('dest123', updateDto as any, mockUser, undefined);
+      const result = await controller.update(
+        'dest123',
+        updateDto as any,
+        mockUser,
+        undefined,
+      );
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockDestination);
-      expect(service.update).toHaveBeenCalledWith('dest123', updateDto, mockUser, undefined);
+      expect(service.update).toHaveBeenCalledWith(
+        'dest123',
+        updateDto,
+        mockUser,
+        undefined,
+      );
     });
   });
 
