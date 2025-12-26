@@ -1,12 +1,10 @@
-import { Prop, Schema } from "@nestjs/mongoose";
+import { Prop, Schema } from '@nestjs/mongoose';
 
-
-@Schema({_id:false})
-export class Image{
+@Schema({ _id: false })
+export class Image {
   @Prop({ required: true })
   url: string;
 
   @Prop({ required: true })
   publicId: string;
-
 }

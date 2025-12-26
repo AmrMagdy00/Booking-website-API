@@ -19,7 +19,7 @@ export class CloudinaryService {
     try {
       const result = await cloudinary.uploader.upload(filePath, { folder });
       return { url: result.secure_url, publicId: result.public_id };
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException('Cloudinary upload failed');
     }
   }
@@ -27,7 +27,7 @@ export class CloudinaryService {
   async deleteImage(publicId: string): Promise<void> {
     try {
       await cloudinary.uploader.destroy(publicId);
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException('Cloudinary deletion failed');
     }
   }
@@ -41,7 +41,11 @@ export class CloudinaryService {
         { folder },
         (error, result) => {
           if (error || !result) {
-            return reject(error ?? new Error('Cloudinary upload failed'));
+            return reject(
+              error instanceof Error
+                ? error
+                : new Error('Cloudinary upload failed'),
+            );
           }
 
           resolve({
