@@ -1,4 +1,3 @@
-
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
@@ -7,7 +6,15 @@ import { UserRole } from '@/modules/users/enums/user-role.enum';
 import { JWTPayloadType } from '@/common/auth/types/jwt-payload.type';
 import { UsersService } from '@/modules/users/users.service';
 import { ROLES_KEY } from '@/common/auth/decorators/roles.decorator';
-import { CanActivate, ExecutionContext, ForbiddenException, forwardRef, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  forwardRef,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 @Injectable()
 export class AuthRolesGuard implements CanActivate {
@@ -43,13 +50,18 @@ export class AuthRolesGuard implements CanActivate {
       );
       if (requiredRoles && requiredRoles.length > 0) {
         if (!requiredRoles.includes(user.role)) {
-          throw new ForbiddenException('Access denied, insufficient permissions');
+          throw new ForbiddenException(
+            'Access denied, insufficient permissions',
+          );
         }
       }
 
       return true;
     } catch (error) {
-      if (error instanceof UnauthorizedException || error instanceof ForbiddenException) {
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof ForbiddenException
+      ) {
         throw error;
       }
       throw new UnauthorizedException('Access denied, invalid token');

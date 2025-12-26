@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 @Injectable()
 export class JwtGuard implements CanActivate {
   canActivate(
-    context: ExecutionContext,
+    _context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     return true;
   }

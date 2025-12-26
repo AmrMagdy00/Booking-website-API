@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { tap, catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
-import { AppLogger } from '../logger/app-logger.service';
+import { AppLogger } from '@/common/logger/app-logger.service';
 
 /**
  * LoggingInterceptor - Intercepts all HTTP requests to log request details
@@ -18,8 +18,12 @@ export class LoggingInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler) {
     const httpContext = context.switchToHttp();
-    const request = httpContext.getRequest();
-    const response = httpContext.getResponse();
+    const request = httpContext.getRequest<{
+      method: string;
+      url: string;
+      user?: { id: string };
+    }>();
+    const response = httpContext.getResponse<{ statusCode: number }>();
 
     const { method, url } = request;
     const userId = request.user?.id;
@@ -38,7 +42,7 @@ export class LoggingInterceptor implements NestInterceptor {
           userId,
         });
       }),
-      catchError((error) => {
+      catchError((error: { status?: number; message?: string }) => {
         const duration = Date.now() - start;
         const statusCode = error.status || 500;
 
@@ -48,7 +52,7 @@ export class LoggingInterceptor implements NestInterceptor {
           statusCode,
           duration,
           userId,
-          error: error.message,
+          error: error.message || 'Unknown error',
         });
 
         return throwError(() => error);
