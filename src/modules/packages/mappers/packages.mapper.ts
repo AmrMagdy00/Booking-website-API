@@ -24,6 +24,7 @@ export class PackagesMapper {
       name: packageDoc.name,
       description: packageDoc.description,
       duration: packageDoc.duration,
+      image: packageDoc.image,
       groupSize: packageDoc.groupSize,
       price: packageDoc.price,
     };

@@ -10,6 +10,7 @@ export class PackageListItemDto {
   name: string;
   description: string;
   duration: number; // Duration in days
+  image: Image; // Package image
   groupSize: number; // Maximum group size
   price: number; // Package price
 }

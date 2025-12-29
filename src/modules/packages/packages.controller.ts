@@ -36,11 +36,17 @@ export class PackagesController {
     return ResponseService.paginatedResponse(result.items, result.meta);
   }
 
-  @Get('admin/all')
+  @Get('/all')
   @UseGuards(AuthRolesGuard)
   @Roles(UserRole.ADMIN)
-  async getAllPackages() {
-    const result = await this.packagesService.findAll();
+  async getAllPackages(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    const result = await this.packagesService.findAll(
+      page ? Number(page) : undefined,
+      limit ? Number(limit) : undefined,
+    );
     return ResponseService.paginatedResponse(result.items, result.meta);
   }
 

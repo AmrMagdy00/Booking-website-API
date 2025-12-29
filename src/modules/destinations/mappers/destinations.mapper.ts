@@ -17,6 +17,7 @@ export class DestinationsMapper {
     return {
       _id: destination._id.toString(),
       name: destination.name,
+      description: destination.description,
       image: {
         url: destination.image.url,
         publicId: destination.image.publicId,

@@ -217,6 +217,10 @@ describe('PackagesService', () => {
           name: 'Test Package',
           description: 'Test Description',
           duration: 5,
+          image: {
+            url: 'https://example.com/image.jpg',
+            publicId: 'packages/test-image',
+          },
           groupSize: 10,
           price: 1000,
         },
