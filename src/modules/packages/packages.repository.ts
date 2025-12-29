@@ -25,6 +25,26 @@ export class PackagesRepository {
   }
 
   /**
+   * Finds all packages with pagination
+   * @param page - Page number (1-indexed)
+   * @param limit - Number of items per page
+   * @returns Object containing packages array and total count
+   */
+  async findAll(
+    page: number,
+    limit: number,
+  ): Promise<{ packages: PackageDocument[]; total: number }> {
+    const skip = (page - 1) * limit;
+
+    const [packages, total] = await Promise.all([
+      this.packageModel.find().skip(skip).limit(limit).exec(),
+      this.packageModel.countDocuments().exec(),
+    ]);
+
+    return { packages, total };
+  }
+
+  /**
    * Finds packages by destination ID with pagination
    * @param destinationId - Destination ObjectId to filter by
    * @param page - Page number (1-indexed)

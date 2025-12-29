@@ -36,6 +36,14 @@ export class PackagesController {
     return ResponseService.paginatedResponse(result.items, result.meta);
   }
 
+  @Get('admin/all')
+  @UseGuards(AuthRolesGuard)
+  @Roles(UserRole.ADMIN)
+  async getAllPackages() {
+    const result = await this.packagesService.findAll();
+    return ResponseService.paginatedResponse(result.items, result.meta);
+  }
+
   @Get(':id')
   async getPackageById(@Param('id') id: string) {
     const packageDetail = await this.packagesService.findById(id);

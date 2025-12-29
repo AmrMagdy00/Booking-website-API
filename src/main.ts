@@ -31,7 +31,10 @@ async function bootstrap() {
 
         // In development, allow all localhost origins
         if (isDevelopment) {
-          if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+          if (
+            origin.startsWith('http://localhost:') ||
+            origin.startsWith('http://127.0.0.1:')
+          ) {
             return callback(null, true);
           }
         }
@@ -67,9 +70,7 @@ async function bootstrap() {
 
     // Get port from configuration and start the server
     const port =
-      configService.get<number>('app.port') ||
-      Number(process.env.PORT) ||
-      3000;
+      configService.get<number>('app.port') || Number(process.env.PORT) || 3000;
 
     await app.listen(port);
     console.log(`Application is running on: http://localhost:${port}`);

@@ -168,6 +168,46 @@ export class PackagesService {
     }
   }
 
+  async findAll(page: number = 1, limit: number = 10): Promise<{
+    items: PackageListItemDto[];
+    meta: { page: number; limit: number; total: number; totalPages: number };
+  }> {
+    try {
+      this.logger.info('Admin fetching all packages', {
+        page,
+        limit,
+      });
+
+      const { packages, total } = await this.packagesRepository.findAll(
+        page,
+        limit,
+      );
+
+      const totalPages = Math.ceil(total / limit);
+      const items = this.packagesMapper.toListItemDtoArray(packages);
+
+      this.logger.info('All packages fetched successfully', {
+        count: items.length,
+        total,
+      });
+
+      return {
+        items,
+        meta: {
+          page,
+          limit,
+          total,
+          totalPages,
+        },
+      };
+    } catch (error) {
+      this.logger.error('Failed to fetch all packages', {
+        error,
+      });
+      throw new BadRequestException('Failed to fetch packages');
+    }
+  }
+
   async findById(id: string): Promise<PackageDetailDto> {
     try {
       this.logger.info('Fetching package by ID', { packageId: id });
