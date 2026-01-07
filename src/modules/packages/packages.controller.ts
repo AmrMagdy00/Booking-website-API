@@ -37,8 +37,6 @@ export class PackagesController {
   }
 
   @Get('/all')
-  @UseGuards(AuthRolesGuard)
-  @Roles(UserRole.ADMIN)
   async getAllPackages(
     @Query('page') page?: number,
     @Query('limit') limit?: number,
