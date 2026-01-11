@@ -38,6 +38,9 @@ export class User {
   })
   role: UserRole;
 
+  @Prop({ required: false, trim: true })
+  phone?: string;
+
   @Prop({ default: null })
   deletedAt: Date;
 }
