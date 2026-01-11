@@ -13,7 +13,7 @@ export class UsersMapper {
       email: user.email,
       role: user.role,
       isAccountVerified: user.isAccountVerified,
-      phone: user.phone,
+      phone: user.phone ?? null,
       createdAt: (user as any).createdAt,
       updatedAt: (user as any).updatedAt,
     };
