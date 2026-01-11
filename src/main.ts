@@ -13,38 +13,24 @@ async function bootstrap() {
 
     // CORS configuration - Allow frontend to access the API
     const configService = app.get(ConfigService);
-    const isDevelopment = process.env.NODE_ENV !== 'production';
-    const allowedOrigins = process.env.ALLOWED_ORIGINS
-      ? process.env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim())
-      : [
-          'http://localhost:3000',
-          'http://localhost:3001',
-          'http://localhost:5173',
-          'http://localhost:4200',
-          'http://localhost:8080',
-        ];
 
     app.enableCors({
       origin: (origin, callback) => {
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
 
-        // In development, allow all localhost origins
-        if (isDevelopment) {
-          if (
-            origin.startsWith('http://localhost:') ||
-            origin.startsWith('http://127.0.0.1:')
-          ) {
-            return callback(null, true);
-          }
+        // Always allow localhost:3000
+        if (origin === 'http://localhost:3000') {
+          return callback(null, true);
         }
 
-        // Check if origin is in allowed list
-        if (allowedOrigins.indexOf(origin) !== -1) {
-          callback(null, true);
-        } else {
-          callback(new Error('Not allowed by CORS'));
+        // Allow any HTTPS origin (including https://egyptgo.vercel.app/)
+        if (origin.startsWith('https://')) {
+          return callback(null, true);
         }
+
+        // Reject other origins
+        callback(new Error('Not allowed by CORS'));
       },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -74,7 +60,7 @@ async function bootstrap() {
 
     await app.listen(port);
     console.log(`Application is running on: http://localhost:${port}`);
-    console.log(`CORS enabled for origins: ${allowedOrigins.join(', ')}`);
+    console.log(`CORS enabled for: localhost:3000 and all HTTPS origins`);
   } catch (error) {
     console.error('Error starting the application:', error);
     process.exit(1);
