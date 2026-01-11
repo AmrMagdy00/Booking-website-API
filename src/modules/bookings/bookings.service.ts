@@ -73,7 +73,7 @@ export class BookingsService {
         contactId: contact._id,
       });
 
-      return this.bookingsMapper.toDetailDto(createdBooking);
+      return this.bookingsMapper.toDetailDto(createdBooking, contact);
     } catch (error) {
       if (
         error instanceof NotFoundException ||
@@ -124,7 +124,27 @@ export class BookingsService {
         limit,
       );
 
-      const items = this.bookingsMapper.toListItemDtoArray(bookings);
+      // Fetch all contacts for the bookings
+      const uniqueContactIds = [
+        ...new Set(bookings.map((b) => b.contactId.toString())),
+      ];
+      const contactsArray = await Promise.all(
+        uniqueContactIds.map((id) => this.bookingContactService.findById(id)),
+      );
+      const contactsMap = new Map(
+        contactsArray.map((contact) => [contact._id.toString(), contact]),
+      );
+      const contacts = bookings.map((b) => {
+        const contact = contactsMap.get(b.contactId.toString());
+        if (!contact) {
+          throw new NotFoundException(
+            `Contact not found for booking ${b._id.toString()}`,
+          );
+        }
+        return contact;
+      });
+
+      const items = this.bookingsMapper.toListItemDtoArray(bookings, contacts);
       const meta = PaginationUtil.calculateMeta(total, page, limit);
 
       return { items, meta };
@@ -160,7 +180,12 @@ export class BookingsService {
         );
       }
 
-      return this.bookingsMapper.toDetailDto(booking);
+      // Fetch contact details
+      const contact = await this.bookingContactService.findById(
+        booking.contactId.toString(),
+      );
+
+      return this.bookingsMapper.toDetailDto(booking, contact);
     } catch (error) {
       if (
         error instanceof NotFoundException ||
@@ -227,7 +252,12 @@ export class BookingsService {
 
       this.logger.info('Booking updated successfully', { bookingId: id });
 
-      return this.bookingsMapper.toDetailDto(updatedBooking);
+      // Fetch contact details
+      const contact = await this.bookingContactService.findById(
+        updatedBooking.contactId.toString(),
+      );
+
+      return this.bookingsMapper.toDetailDto(updatedBooking, contact);
     } catch (error) {
       if (
         error instanceof NotFoundException ||

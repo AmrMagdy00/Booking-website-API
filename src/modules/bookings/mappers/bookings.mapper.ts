@@ -7,10 +7,12 @@ import {
 import {
   BookingListItemDto,
   BookingDetailDto,
+  BookingContactDto,
 } from '@/modules/bookings/dtos/booking-response.dto';
 import { CreateBookingDto } from '@/modules/bookings/dtos/create-booking.dto';
 import { UpdateBookingDto } from '@/modules/bookings/dtos/update-booking.dto';
 import { BookingStatus } from '@/modules/bookings/enums/booking-status.enum';
+import { BookingContactDocument } from '@/modules/bookings/booking-contact/booking-contact.schema';
 
 /**
  * BookingsMapper - Mapper layer for transforming between schemas and DTOs
@@ -19,11 +21,24 @@ import { BookingStatus } from '@/modules/bookings/enums/booking-status.enum';
  */
 @Injectable()
 export class BookingsMapper {
-  toListItemDto(bookingDoc: BookingDocument): BookingListItemDto {
+  toContactDto(contact: BookingContactDocument): BookingContactDto {
+    return {
+      id: contact._id.toString(),
+      name: contact.name,
+      email: contact.email,
+      phone: contact.phone,
+    };
+  }
+
+  toListItemDto(
+    bookingDoc: BookingDocument,
+    contact: BookingContactDocument,
+  ): BookingListItemDto {
     return {
       id: bookingDoc._id.toString(),
       userId: bookingDoc.userId.toString(),
       contactId: bookingDoc.contactId.toString(),
+      contact: this.toContactDto(contact),
       packageId: bookingDoc.packageId.toString(),
       numberOfPeople: bookingDoc.numberOfPeople,
       totalPrice: bookingDoc.totalPrice,
@@ -31,11 +46,15 @@ export class BookingsMapper {
     };
   }
 
-  toDetailDto(bookingDoc: BookingDocument): BookingDetailDto {
+  toDetailDto(
+    bookingDoc: BookingDocument,
+    contact: BookingContactDocument,
+  ): BookingDetailDto {
     return {
       id: bookingDoc._id.toString(),
       userId: bookingDoc.userId.toString(),
       contactId: bookingDoc.contactId.toString(),
+      contact: this.toContactDto(contact),
       packageId: bookingDoc.packageId.toString(),
       numberOfPeople: bookingDoc.numberOfPeople,
       totalPrice: bookingDoc.totalPrice,
@@ -45,8 +64,22 @@ export class BookingsMapper {
     };
   }
 
-  toListItemDtoArray(bookingDocs: BookingDocument[]): BookingListItemDto[] {
-    return bookingDocs.map((doc) => this.toListItemDto(doc));
+  toListItemDtoArray(
+    bookingDocs: BookingDocument[],
+    contacts: BookingContactDocument[],
+  ): BookingListItemDto[] {
+    const contactMap = new Map(
+      contacts.map((c) => [c._id.toString(), c]),
+    );
+    return bookingDocs.map((doc) => {
+      const contact = contactMap.get(doc.contactId.toString());
+      if (!contact) {
+        throw new Error(
+          `Contact not found for booking ${doc._id.toString()}`,
+        );
+      }
+      return this.toListItemDto(doc, contact);
+    });
   }
 
   toBookingData(
