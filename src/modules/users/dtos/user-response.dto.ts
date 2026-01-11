@@ -6,7 +6,7 @@ export class UserResponseDto {
   email: string;
   role: UserRole;
   isAccountVerified: boolean;
-  phone?: string;
+  phone?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
